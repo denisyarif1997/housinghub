@@ -1,0 +1,49 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Inter', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+html {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: var(--font-sans);
+    min-height: 100dvh;
+}
+
+@utility pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@utility pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+[x-transition] {
+    transition: transform .2s ease, opacity .2s ease;
+}
+
+input, select, textarea, button {
+    font-size: 16px;
+}
+
+@media (min-width: 768px) {
+    input, select, textarea, button {
+        font-size: 14px;
+    }
+    input.form-control, select.form-control, textarea.form-control {
+        font-size: 14px;
+    }
+}
+

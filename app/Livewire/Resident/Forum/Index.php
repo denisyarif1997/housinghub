@@ -1,0 +1,162 @@
+<?php
+
+namespace App\Livewire\Resident\Forum;
+
+use App\Models\ActivityLog;
+use App\Models\Post;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class Index extends Component
+{
+    use WithPagination;
+
+    public string $search = '';
+
+    public string $categoryFilter = '';
+
+    public bool $showForm = false;
+
+    public string $title = '';
+
+    public string $body = '';
+
+    public string $category = 'umum';
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedCategoryFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function openForm(): void
+    {
+        $this->authorize('create', Post::class);
+        $this->showForm = true;
+        $this->resetValidation();
+    }
+
+    public function closeForm(): void
+    {
+        $this->showForm = false;
+        $this->reset(['title', 'body', 'category']);
+        $this->resetValidation();
+    }
+
+    /**
+     * Warga membuat postingan baru di forum.
+     */
+    public function submit(): void
+    {
+        $this->authorize('create', Post::class);
+
+        $user = auth()->user();
+        abort_if(! $user->resident_id, 403, 'Akun tidak terhubung dengan data warga.');
+
+        $data = $this->validate([
+            'title' => ['required', 'string', 'max:150'],
+            'body' => ['required', 'string', 'max:3000'],
+            'category' => ['required', 'in:'.implode(',', array_keys(Post::categories()))],
+        ], [
+            'title.required' => 'Judul postingan wajib diisi.',
+            'body.required' => 'Isi postingan wajib diisi.',
+            'category.required' => 'Kategori wajib dipilih.',
+        ]);
+
+        $residentId = (int) $user->resident_id;
+        $houseId = DB::table('house_residents')
+            ->where('resident_id', $residentId)
+            ->where('status', 'active')
+            ->orderByDesc('is_primary')
+            ->value('house_id');
+
+        $estateId = $houseId
+            ? DB::table('houses')->where('id', $houseId)->value('housing_estate_id')
+            : null;
+
+        $post = DB::transaction(function () use ($data, $residentId, $estateId, $user) {
+            $post = Post::create([
+                'housing_estate_id' => $estateId,
+                'resident_id' => $residentId,
+                'user_id' => $user->id,
+                'title' => $data['title'],
+                'body' => $data['body'],
+                'category' => $data['category'],
+                'is_pinned' => false,
+            ]);
+
+            ActivityLog::record([
+                'user_id' => $user->id,
+                'action' => 'create',
+                'module' => 'forum',
+                'subject_type' => Post::class,
+                'subject_id' => $post->id,
+                'description' => 'Postingan forum baru: '.$post->title,
+                'new_values' => $post->toArray(),
+            ]);
+
+            return $post;
+        });
+
+        $this->closeForm();
+        session()->flash('success', 'Postingan berhasil dibagikan ke warga.');
+        $this->redirectRoute('resident.forum.show', $post, navigate: true);
+    }
+
+    /**
+     * Warga menghapus postingannya sendiri. Moderator juga boleh menghapus.
+     */
+    public function delete(int $id): void
+    {
+        $post = Post::withCount('comments')->findOrFail($id);
+        $this->authorize('delete', $post);
+
+        DB::transaction(function () use ($post) {
+            ActivityLog::record([
+                'user_id' => auth()->id(),
+                'action' => 'delete',
+                'module' => 'forum',
+                'subject_type' => Post::class,
+                'subject_id' => $post->id,
+                'description' => 'Menghapus postingan forum: '.$post->title,
+                'old_values' => $post->toArray(),
+            ]);
+
+            // Komentar ikut terhapus (cascade) agar tidak ada komentar yatim.
+            $post->comments()->delete();
+            $post->delete();
+        });
+
+        session()->flash('success', 'Postingan berhasil dihapus.');
+        $this->resetPage();
+    }
+
+    #[Layout('layouts.resident', ['title' => 'Forum Warga'])]
+    public function render()
+    {
+        return view('livewire.resident.forum.index', [
+            'posts' => Post::query()
+                ->with(['author', 'resident.houseResidents.house'])
+                ->withCount('comments')
+                ->when($this->search, fn ($q) => $q->where(function ($qq) {
+                    $qq->where('title', 'like', "%{$this->search}%")
+                        ->orWhere('body', 'like', "%{$this->search}%");
+                }))
+                ->inCategory($this->categoryFilter)
+                ->pinnedFirst()
+                ->paginate(10),
+            'categories' => Post::categories(),
+            'summary' => [
+                'total' => Post::count(),
+                'mine' => Post::where('resident_id', auth()->user()->resident_id)->count(),
+                'today' => Post::whereDate('created_at', now()->toDateString())->count(),
+            ],
+        ]);
+    }
+}

@@ -1,0 +1,132 @@
+@props(['title' => config('app.name', 'HousingHub')])
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{ $title }} — {{ config('app.name', 'HousingHub') }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+</head>
+<body class="bg-[#F8FAFC] text-[#0F172A]">
+<div x-data="{ sidebar: false }" class="min-h-dvh lg:flex">
+    <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-[#E2E8F0] bg-white lg:flex">
+        <div class="flex items-center gap-3 px-5 pb-5 pt-6">
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0F172A] text-white">
+                <i data-lucide="home" class="h-5 w-5"></i>
+            </div>
+            <p class="font-bold">{{ config('app.name', 'HousingHub') }}</p>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto px-3 pb-6 text-[14px]">
+            @php
+                $user = auth()->user();
+                $navLink = 'flex items-center gap-3 rounded-xl px-3 py-2.5 transition';
+                $navIdle = 'hover:bg-slate-100';
+                $navGroup = 'px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-[#64748B]';
+                $sections = [
+                    ['label' => null, 'items' => [
+                        ['admin.dashboard', 'layout-dashboard', 'Dashboard', 'admin.dashboard', ['view-dashboard']],
+                    ]],
+                    ['label' => 'Data Master', 'items' => [
+                        ['admin.estates.index', 'building-2', 'Perumahan', 'admin.estates.*', ['manage-houses']],
+                        ['admin.blocks.index', 'grid-2x2', 'Blok', 'admin.blocks.*', ['manage-houses']],
+                        ['admin.houses.index', 'house', 'Rumah', 'admin.houses.*', ['manage-houses']],
+                        ['admin.residents.index', 'users', 'Warga', 'admin.residents.*', ['manage-residents']],
+                    ]],
+                    ['label' => 'Keuangan — IPL', 'items' => [
+                        ['admin.ipl.billings.index', 'file-text', 'Tagihan IPL', 'admin.ipl.billings.*', ['manage-billing', 'verify-payment']],
+                        ['admin.ipl.generate', 'calendar-plus', 'Generate Tagihan', 'admin.ipl.generate', ['manage-billing']],
+                        ['admin.ipl.payments.index', 'receipt', 'Pembayaran', 'admin.ipl.payments.*', ['manage-payment', 'verify-payment']],
+                        ['admin.ipl.rates.index', 'tags', 'Tarif IPL', 'admin.ipl.rates.*', ['manage-billing']],
+                    ]],
+                    ['label' => 'Info & Layanan', 'items' => [
+                        ['admin.info.announcements', 'megaphone', 'Pengumuman', 'admin.info.announcements', ['manage-announcement']],
+                        ['admin.info.complaints', 'message-square-warning', 'Laporan Warga', 'admin.info.complaints*', ['manage-complaint']],
+                        ['admin.forum.index', 'messages-square', 'Forum Warga', 'admin.forum.*', ['manage-forum']],
+                    ]],
+                    ['label' => 'Sistem', 'items' => [
+                        ['admin.users.index', 'user-cog', 'User', 'admin.users.*', ['manage-user']],
+                        ['admin.roles.index', 'shield-check', 'Role & Akses', 'admin.roles.*', ['manage-role']],
+                        ['admin.activity-logs.index', 'history', 'Log Aktivitas', 'admin.activity-logs.*', ['view-activity-log']],
+                    ]],
+                ];
+
+                // Hanya tampilkan menu (dan judul grupnya) yang boleh diakses user.
+                $sections = collect($sections)
+                    ->map(function (array $section) use ($user) {
+                        $section['items'] = array_values(array_filter(
+                            $section['items'],
+                            fn (array $item) => $user->hasPermission(...$item[4])
+                        ));
+
+                        return $section;
+                    })
+                    ->filter(fn (array $section) => $section['items'] !== [])
+                    ->values()
+                    ->all();
+            @endphp
+
+            @foreach ($sections as $section)
+                @if ($section['label'])
+                    <p class="{{ $navGroup }}">{{ $section['label'] }}</p>
+                @endif
+                @foreach ($section['items'] as [$route, $icon, $label, $pattern])
+                    <a href="{{ route($route) }}" wire:navigate
+                        class="{{ $navLink }} {{ request()->routeIs($pattern) ? 'bg-[#0F172A] font-semibold text-white' : $navIdle }}">
+                        <i data-lucide="{{ $icon }}" class="h-4 w-4"></i> {{ $label }}
+                    </a>
+                @endforeach
+            @endforeach
+        </nav>
+    </aside>
+
+    {{-- Drawer mobile --}}
+    <div x-show="sidebar" x-cloak class="fixed inset-0 z-50 lg:hidden">
+        <div @click="sidebar=false" class="absolute inset-0 bg-black/40"></div>
+        <aside x-show="sidebar" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+            class="absolute inset-y-0 left-0 flex w-72 flex-col bg-white">
+            <div class="flex items-center justify-between px-5 pb-4 pt-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0F172A] text-white">
+                        <i data-lucide="home" class="h-5 w-5"></i>
+                    </div>
+                    <p class="font-bold">{{ config('app.name', 'HousingHub') }}</p>
+                </div>
+                <button @click="sidebar=false" class="flex h-11 w-11 items-center justify-center rounded-xl border">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            <nav class="flex-1 space-y-1 overflow-y-auto px-3 pb-8 text-[14px]">
+                @foreach ($sections as $section)
+                    @if ($section['label'])
+                        <p class="{{ $navGroup }}">{{ $section['label'] }}</p>
+                    @endif
+                    @foreach ($section['items'] as [$route, $icon, $label, $pattern])
+                        <a href="{{ route($route) }}" wire:navigate @click="sidebar=false"
+                            class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs($pattern) ? 'bg-[#0F172A] font-semibold text-white' : $navIdle }}">
+                            <i data-lucide="{{ $icon }}" class="h-4 w-4"></i> {{ $label }}
+                        </a>
+                    @endforeach
+                @endforeach
+            </nav>
+        </aside>
+    </div>
+    <div class="flex min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-30 border-b border-[#E2E8F0] bg-white">
+            <div class="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+                <button @click="sidebar=true" class="flex h-11 w-11 items-center justify-center rounded-xl border lg:hidden"><i data-lucide="menu" class="h-5 w-5"></i></button>
+                <h1 class="flex-1 truncate text-lg font-bold">{{ $title }}</h1>
+                <div class="flex items-center gap-2">
+                    <livewire:logout />
+                </div>
+            </div>
+        </header>
+        <main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-4 lg:pb-10">{{ $slot }}</main>
+    </div>
+</div>
+@livewireScripts
+</body>
+</html>
