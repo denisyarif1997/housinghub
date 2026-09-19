@@ -4,6 +4,8 @@
     $styles = [
         'slate' => 'bg-slate-100 text-slate-700',
         'green' => 'bg-emerald-50 text-emerald-700',
+        'emerald' => 'bg-emerald-50 text-emerald-700',
+        'purple' => 'bg-purple-50 text-purple-700',
         'red' => 'bg-red-50 text-red-700',
         'amber' => 'bg-amber-50 text-amber-700',
         'sky' => 'bg-sky-50 text-sky-700',

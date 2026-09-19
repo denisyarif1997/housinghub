@@ -70,6 +70,7 @@
         $navItems = [
             ['resident.dashboard', 'home', 'Home', 'resident.dashboard'],
             ['resident.ipl.index', 'wallet', 'IPL', 'resident.ipl.*'],
+            ['resident.chess.index', 'crown', 'Catur', 'resident.chess.*'],
             ['resident.forum.index', 'messages-square', 'Forum', 'resident.forum.*'],
             ['resident.complaints.index', 'wrench', 'Aduan', 'resident.complaints.*'],
             ['resident.info.index', 'megaphone', 'Info', 'resident.info.*'],
@@ -79,11 +80,11 @@
 
     <nav class="fixed inset-x-0 bottom-0 z-30 pb-safe">
         <div class="mx-auto max-w-md px-3 pb-3">
-            <div class="grid grid-cols-6 rounded-[20px] border border-[#E2E8F0] bg-white/90 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+            <div class="no-scrollbar flex gap-1 overflow-x-auto rounded-[20px] border border-[#E2E8F0] bg-white/90 px-1.5 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur-xl">
                 @foreach ($navItems as [$route, $icon, $label, $pattern])
                     @php $active = request()->routeIs($pattern); @endphp
                     <a href="{{ route($route) }}"
-                        class="flex min-h-[64px] flex-col items-center justify-center gap-1 text-[10px] tracking-wide {{ $active? 'font-semibold text-[#0F172A]' : 'font-medium text-[#64748B] hover:text-[#0F172A]' }}">
+                        class="flex min-h-[64px] w-[62px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] tracking-wide {{ $active? 'font-semibold text-[#0F172A]' : 'font-medium text-[#64748B] hover:text-[#0F172A]' }}">
                         <span class="flex h-8 w-10 items-center justify-center rounded-lg transition {{ $active? 'bg-[#0F172A] text-white shadow-sm' : '' }}">
                             <i data-lucide="{{ $icon }}" class="h-[20px] w-[20px]"></i>
                         </span>

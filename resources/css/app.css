@@ -25,6 +25,16 @@ body {
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Sembunyikan scrollbar navbar horizontal resident */
+@utility no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 @utility pt-safe {
     padding-top: env(safe-area-inset-top, 0px);
 }

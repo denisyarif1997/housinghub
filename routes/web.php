@@ -21,6 +21,8 @@ use App\Livewire\Admin\Residents\Index as ResidentIndex;
 use App\Livewire\Admin\Roles\Index as RoleIndex;
 use App\Livewire\Admin\Users\Index as UserIndex;
 use App\Livewire\Auth\Login;
+use App\Livewire\Resident\Chess\Index as ResidentChessIndex;
+use App\Livewire\Resident\Chess\Play as ResidentChessPlay;
 use App\Livewire\Resident\Complaints\Index as ResidentComplaintIndex;
 use App\Livewire\Resident\Complaints\Show as ResidentComplaintShow;
 use App\Livewire\Resident\Dashboard as ResidentDashboard;
@@ -50,6 +52,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/complaints/{complaint}', ResidentComplaintShow::class)->name('complaints.show');
         Route::get('/forum', ResidentForumIndex::class)->name('forum.index');
         Route::get('/forum/{post}', ResidentForumShow::class)->name('forum.show');
+        Route::get('/chess', ResidentChessIndex::class)->name('chess.index');
+        Route::get('/chess/{game}', ResidentChessPlay::class)->name('chess.play');
         Route::get('/profile', ResidentProfile::class)->name('profile');
     });
 
