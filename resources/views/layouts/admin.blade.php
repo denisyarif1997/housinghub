@@ -10,6 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    <script>
+        // Terapkan tema sebelum render untuk mencegah flash (FOUC).
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="bg-[#F8FAFC] text-[#0F172A]">
 <div x-data="{ sidebar: false }" class="min-h-dvh lg:flex">
@@ -120,6 +129,12 @@
                 <button @click="sidebar=true" class="flex h-11 w-11 items-center justify-center rounded-xl border lg:hidden"><i data-lucide="menu" class="h-5 w-5"></i></button>
                 <h1 class="flex-1 truncate text-lg font-bold">{{ $title }}</h1>
                 <div class="flex items-center gap-2">
+                    <button type="button" data-theme-toggle
+                        class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] transition hover:bg-slate-100"
+                        aria-label="Ganti tema">
+                        <i data-lucide="moon" class="h-5 w-5 hidden dark:block"></i>
+                        <i data-lucide="sun" class="h-5 w-5 block dark:hidden"></i>
+                    </button>
                     <livewire:logout />
                 </div>
             </div>

@@ -3,6 +3,9 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/* Aktifkan dark mode berbasis class (html.dark) untuk Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
     --font-sans: 'Inter', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
@@ -28,6 +31,119 @@ body {
 
 [x-cloak] {
     display: none !important;
+}
+
+/* =========================================================
+   DARK MODE (tombol toggle di layout admin & resident)
+   Karena sebagian besar view memakai warna hardcoded
+   (bg-white, bg-[#F8FAFC], border-[#E2E8F0], text-[#64748B], dst),
+   warna-warna tersebut dipetakan ulang di bawah html.dark
+   agar seluruh halaman admin & resident ikut gelap otomatis.
+   ========================================================= */
+
+/* Toggle transition halus */
+body,
+aside,
+header,
+nav {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+html.dark body {
+    background-color: #0b1220;
+    color: #e2e8f0;
+}
+
+/* --- Permukaan / kartu --- */
+html.dark .bg-white:not(.dark\:keep),
+html.dark .bg-\[\#F8FAFC\],
+html.dark .bg-\[\#FDFDFC\],
+html.dark .bg-\[\#eeeeec\],
+html.dark .bg-\[\#dbdbd7\],
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-gray-200 {
+    background-color: #1e293b !important;
+}
+
+/* Header & navbar transparan-gelap */
+html.dark header.bg-white\/80,
+html.dark nav .bg-white\/90 {
+    background-color: rgba(15, 23, 42, 0.85) !important;
+}
+
+/* --- Teks --- */
+html.dark .text-\[\#0F172A\],
+html.dark .text-\[\#1b1b18\],
+html.dark .text-\[\#1C1C1A\],
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-900 {
+    color: #e2e8f0 !important;
+}
+
+html.dark .text-\[\#64748B\],
+html.dark .text-\[\#94A3B8\],
+html.dark .text-\[\#334155\],
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+    color: #94a3b8 !important;
+}
+
+/* --- Border --- */
+html.dark .border-\[\#E2E8F0\],
+html.dark .border-\[\#e3e3e0\],
+html.dark .border-slate-200,
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark .border-gray-400 {
+    border-color: #334155 !important;
+}
+
+/* --- Latar aksen (sidebar aktif, tombol gelap) tetap kontras --- */
+html.dark .bg-\[\#0F172A\] {
+    background-color: #38bdf8;
+    color: #0b1220;
+}
+
+/* --- Form & input --- */
+html.dark input,
+html.dark select,
+html.dark textarea {
+    background-color: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #64748b;
+}
+
+/* Badge / notifikasi lembut */
+html.dark .bg-red-50,
+html.dark .bg-amber-50,
+html.dark .bg-emerald-50,
+html.dark .bg-sky-50 {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .border-red-200,
+html.dark .border-amber-200,
+html.dark .border-emerald-200,
+html.dark .border-sky-200,
+html.dark .border-red-100 {
+    border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 [x-transition] {

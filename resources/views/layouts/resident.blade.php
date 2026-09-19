@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ $title }}</title>
-    <meta name="color-scheme" content="light">
+    <meta name="color-scheme" content="light dark">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,6 +14,16 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
+    <script>
+        // Terapkan tema sebelum render untuk mencegah flash (FOUC).
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 
     <style>
         /* fix untuk notch iphone */
@@ -33,6 +43,12 @@
                 <p class="font-bold tracking-tight">{{ config('app.name', 'HousingHub') }}</p>
             </a>
             <div class="flex items-center gap-2">
+                <button type="button" data-theme-toggle
+                    class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] text-[#0F172A] transition hover:bg-slate-100 active:scale-95"
+                    aria-label="Ganti tema">
+                    <i data-lucide="moon" class="h-5 w-5 hidden dark:block"></i>
+                    <i data-lucide="sun" class="h-5 w-5 block dark:hidden"></i>
+                </button>
                 <button type="button" disabled title="Notifikasi belum tersedia"
                     class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] text-[#94A3B8] opacity-50">
                     <i data-lucide="bell" class="h-5 w-5"></i>
