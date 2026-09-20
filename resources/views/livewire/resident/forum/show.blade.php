@@ -39,41 +39,56 @@
 
     {{-- Komentar --}}
     <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-        <p class="font-bold">Komentar ({{ $commentCount }})</p>
+        <div class="flex items-center justify-between gap-2">
+            <p class="font-bold">Komentar ({{ $commentCount }})</p>
+            @if ($commentCount > 0)
+                <span class="inline-flex items-center gap-1 text-[12px] text-[#64748B]">
+                    <i data-lucide="message-circle" class="h-3.5 w-3.5"></i> Terbaru di bawah
+                </span>
+            @endif
+        </div>
 
-        <div class="mt-3 space-y-3">
+        <div class="mt-3 space-y-3" wire:loading.class="opacity-60" wire:target="addComment,deleteComment">
             @forelse ($post->comments as $comment)
-                <div class="rounded-xl border border-[#E2E8F0] p-3">
+                <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
                     <div class="flex items-start justify-between gap-2">
-                        <div class="flex min-w-0 items-center gap-2">
-                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[12px] font-bold">{{ strtoupper(substr($comment->authorName(), 0, 1)) }}</div>
+                        <div class="flex min-w-0 flex-1 items-center gap-2">
+                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-[12px] font-bold text-white">{{ strtoupper(substr($comment->authorName(), 0, 1)) }}</div>
                             <div class="min-w-0">
                                 <p class="truncate text-[14px] font-bold">{{ $comment->authorName() }}</p>
-                                <p class="text-[12px] text-[#64748B]">{{ $comment->created_at->format('d/m/Y H:i') }}</p>
+                                <p class="text-[12px] text-[#64748B]">{{ $comment->created_at->diffForHumans() }}</p>
                             </div>
                         </div>
                         @if (auth()->user()->can('delete', $comment))
                             <button type="button" wire:click="deleteComment({{ $comment->id }})" wire:confirm="Hapus komentar ini?"
                                 title="Hapus komentar"
-                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-red-200 text-red-700">
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-red-700 ring-1 ring-red-200">
                                 <i data-lucide="trash-2" class="h-4 w-4"></i>
                             </button>
                         @endif
                     </div>
-                    <p class="mt-1 whitespace-pre-line text-[14px] text-[#64748B]">{{ $comment->body }}</p>
+                    <p class="mt-1.5 whitespace-pre-line text-[14px] leading-relaxed text-slate-700">{{ $comment->body }}</p>
                 </div>
             @empty
                 <x-ui.empty-state icon="message-circle" title="Belum ada komentar" subtitle="Jadilah yang pertama berkomentar." />
             @endforelse
         </div>
 
-        <form wire:submit="addComment" class="mt-4 space-y-2">
-            <x-ui.field label="Tulis Komentar" :error="$errors->first('body')">
-                <textarea wire:model="body" rows="3" placeholder="Tulis komentar untuk warga lain..."
-                    class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-[#0F172A]"></textarea>
-            </x-ui.field>
+        <form wire:submit="addComment" class="mt-4">
+            <div class="flex items-end gap-2">
+                <span class="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-[13px] font-bold text-white">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'W', 0, 1)) }}
+                </span>
+                <div class="min-w-0 flex-1">
+                    <x-ui.field label="Tulis Komentar" :error="$errors->first('body')">
+                        <textarea wire:model.live.debounce.200ms="body" rows="2" maxlength="1000" placeholder="Tulis komentar yang sopan..."
+                            class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-[#0F172A]"></textarea>
+                        <p class="mt-1 text-right text-[12px] text-[#64748B]">{{ mb_strlen($body) }}/1000</p>
+                    </x-ui.field>
+                </div>
+            </div>
             <button type="submit" wire:loading.attr="disabled"
-                class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
+                class="mt-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
                 <i data-lucide="send" class="h-4 w-4"></i>
                 <span wire:loading.remove wire:target="addComment">Kirim</span>
                 <span wire:loading wire:target="addComment">Mengirim...</span>

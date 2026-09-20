@@ -17,6 +17,10 @@ class Index extends Component
 
     public string $categoryFilter = '';
 
+    public string $scopeFilter = '';
+
+    public string $sortBy = 'latest';
+
     public bool $showForm = false;
 
     public string $title = '';
@@ -35,6 +39,35 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function updatedScopeFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSortBy(): void
+    {
+        $this->resetPage();
+    }
+
+    public function setCategory(string $value): void
+    {
+        $this->categoryFilter = $value;
+        $this->resetPage();
+    }
+
+    public function setScope(string $value): void
+    {
+        $this->scopeFilter = $value;
+        $this->resetPage();
+    }
+
+    public function resetFilter(): void
+    {
+        $this->reset(['search', 'categoryFilter', 'scopeFilter']);
+        $this->sortBy = 'latest';
+        $this->resetPage();
+    }
+
     public function openForm(): void
     {
         $this->authorize('create', Post::class);
@@ -45,7 +78,8 @@ class Index extends Component
     public function closeForm(): void
     {
         $this->showForm = false;
-        $this->reset(['title', 'body', 'category']);
+        $this->reset(['title', 'body']);
+        $this->category = 'umum';
         $this->resetValidation();
     }
 
@@ -140,23 +174,35 @@ class Index extends Component
     #[Layout('layouts.resident', ['title' => 'Forum Warga'])]
     public function render()
     {
+        $residentId = auth()->user()->resident_id;
+
+        $query = Post::query()
+            ->with(['author', 'resident.houseResidents.house'])
+            ->withCount('comments')
+            ->when($this->search, fn ($q) => $q->where(function ($qq) {
+                $qq->where('title', 'like', "%{$this->search}%")
+                    ->orWhere('body', 'like', "%{$this->search}%");
+            }))
+            ->inCategory($this->categoryFilter)
+            ->when($this->scopeFilter === 'mine', fn ($q) => $q->where('resident_id', $residentId))
+            ->when($this->scopeFilter === 'pinned', fn ($q) => $q->where('is_pinned', true))
+            ->when($this->scopeFilter === 'today', fn ($q) => $q->whereDate('created_at', now()->toDateString()));
+
+        if ($this->sortBy === 'discussed') {
+            $query->orderByDesc('is_pinned')->orderBy('comments_count', 'desc')->orderByDesc('created_at');
+        } else {
+            $query->pinnedFirst();
+        }
+
         return view('livewire.resident.forum.index', [
-            'posts' => Post::query()
-                ->with(['author', 'resident.houseResidents.house'])
-                ->withCount('comments')
-                ->when($this->search, fn ($q) => $q->where(function ($qq) {
-                    $qq->where('title', 'like', "%{$this->search}%")
-                        ->orWhere('body', 'like', "%{$this->search}%");
-                }))
-                ->inCategory($this->categoryFilter)
-                ->pinnedFirst()
-                ->paginate(10),
+            'posts' => $query->paginate(10),
             'categories' => Post::categories(),
             'summary' => [
                 'total' => Post::count(),
-                'mine' => Post::where('resident_id', auth()->user()->resident_id)->count(),
+                'mine' => Post::where('resident_id', $residentId)->count(),
                 'today' => Post::whereDate('created_at', now()->toDateString())->count(),
             ],
+            'isFiltering' => $this->search !== '' || $this->categoryFilter !== '' || $this->scopeFilter !== '',
         ]);
     }
 }
