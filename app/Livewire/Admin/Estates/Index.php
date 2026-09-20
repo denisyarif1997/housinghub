@@ -40,6 +40,12 @@ class Index extends Component
     public function save(): void
     {
         $this->authorize('create', HousingEstate::class);
+       
+        if (HousingEstate::query()->exists()) {
+        session()->flash('error', 'Data perumahan sudah ada. Hanya boleh 1 perumahan.');
+         return;
+        }
+
         $data = $this->validate([
             'code' => ['required', 'string', 'max:20', 'unique:housing_estates,code'],
             'name' => ['required', 'string', 'max:100'],
@@ -113,6 +119,20 @@ class Index extends Component
     public function delete(HousingEstate $estate): void
     {
         $this->authorize('delete', HousingEstate::class);
+
+        $estate->loadCount(['blocks', 'houses']);
+
+        if ($estate->houses_count > 0) {
+            session()->flash('error', 'Perumahan '.$estate->name.' tidak bisa dihapus karena masih ada '.$estate->houses_count.' rumah.');
+
+            return;
+        }
+
+        if ($estate->blocks_count > 0) {
+            session()->flash('error', 'Perumahan '.$estate->name.' tidak bisa dihapus karena masih ada '.$estate->blocks_count.' blok.');
+
+            return;
+        }
 
         $name = $estate->name;
         $estate->delete();

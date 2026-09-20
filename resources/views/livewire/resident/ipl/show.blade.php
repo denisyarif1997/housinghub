@@ -1,12 +1,34 @@
-@php use App\Support\Currency; @endphp
+@php
+    $isCancelled = $billing->status === 'cancelled';
+    $canPay = $remaining > 0 && ! $isCancelled && ! $hasPendingPayment;
+
+    $inputClass = 'min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]';
+    $cardClass = 'rounded-2xl border border-[#E2E8F0] bg-white p-4';
+
+    $flashes = [
+        'success' => ['type' => 'success', 'icon' => 'check-circle-2'],
+        'error' => ['type' => 'danger', 'icon' => 'alert-circle'],
+    ];
+
+    $summary = [
+        'Sudah Dibayar' => $billing->paid_amount,
+        'Sisa Tagihan' => $remaining,
+    ];
+
+    $methods = [
+        'transfer' => 'Transfer Bank',
+        'cash' => 'Tunai',
+        'qris' => 'QRIS',
+        'other' => 'Lainnya',
+    ];
+@endphp
 
 <div class="space-y-4">
-    @if (session('success'))
-        <x-ui.alert type="success" icon="check-circle-2">{{ session('success') }}</x-ui.alert>
-    @endif
-    @if (session('error'))
-        <x-ui.alert type="danger" icon="alert-circle">{{ session('error') }}</x-ui.alert>
-    @endif
+    @foreach ($flashes as $key => $flash)
+        @if (session($key))
+            <x-ui.alert :type="$flash['type']" :icon="$flash['icon']">{{ session($key) }}</x-ui.alert>
+        @endif
+    @endforeach
 
     <a href="{{ route('resident.ipl.index') }}" wire:navigate class="inline-flex items-center gap-2 text-[14px] font-semibold text-[#64748B]">
         <i data-lucide="arrow-left" class="h-4 w-4"></i> Kembali ke daftar tagihan
@@ -14,27 +36,25 @@
 
     <div class="rounded-2xl bg-[#0F172A] p-4 text-white">
         <div class="flex items-start justify-between gap-3">
-            <div>
-                <p class="text-[13px] text-white/70">Tagihan {{ $periodLabel }}</p>
-                <p class="mt-1 text-[26px] font-bold">@rupiah($billing->total)</p>
-                <p class="text-[13px] text-white/70">Rumah {{ $billing->house?->fullLabel() ?? '-' }}</p>
-                <p class="text-[13px] text-white/70">Jatuh tempo {{ $billing->due_date?->format('d/m/Y') ?? '-' }}</p>
+            <div class="text-[13px] text-white/70">
+                <p>Tagihan {{ $periodLabel }}</p>
+                <p class="mt-1 text-[26px] font-bold text-white">@rupiah($billing->total)</p>
+                <p>Rumah {{ $billing->house?->fullLabel() ?? '-' }}</p>
+                <p>Jatuh tempo {{ $billing->due_date?->format('d/m/Y') ?? '-' }}</p>
             </div>
-            <x-ui.badge color="{{ $billing->statusColor() }}">{{ $billing->statusLabel() }}</x-ui.badge>
+            <x-ui.badge :color="$billing->statusColor()">{{ $billing->statusLabel() }}</x-ui.badge>
         </div>
         <div class="mt-3 grid grid-cols-2 gap-2 text-[13px]">
-            <div class="rounded-xl bg-white/10 p-3">
-                <p class="text-white/70">Sudah Dibayar</p>
-                <p class="font-bold">@rupiah($billing->paid_amount)</p>
-            </div>
-            <div class="rounded-xl bg-white/10 p-3">
-                <p class="text-white/70">Sisa Tagihan</p>
-                <p class="font-bold">@rupiah($remaining)</p>
-            </div>
+            @foreach ($summary as $label => $value)
+                <div class="rounded-xl bg-white/10 p-3">
+                    <p class="text-white/70">{{ $label }}</p>
+                    <p class="font-bold">@rupiah($value)</p>
+                </div>
+            @endforeach
         </div>
     </div>
 
-    @if ($billing->status === 'cancelled')
+    @if ($isCancelled)
         <x-ui.alert type="warning" icon="alert-triangle">Tagihan ini dibatalkan oleh pengelola.</x-ui.alert>
     @endif
 
@@ -44,34 +64,30 @@
         </x-ui.alert>
     @endif
 
-    @if ($remaining > 0 && $billing->status !== 'cancelled' && ! $hasPendingPayment)
-        <form wire:submit="submitPayment" class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
+    @if ($canPay)
+        <form wire:submit="submitPayment" class="{{ $cardClass }}">
             <p class="font-bold">Konfirmasi Pembayaran</p>
             <p class="mt-1 text-[14px] text-[#64748B]">Isi data pembayaran, lalu tunggu verifikasi pengelola.</p>
 
             <div class="mt-3 space-y-3">
                 <x-ui.field label="Nominal Dibayar (Rp)" :error="$errors->first('amount')">
-                    <input wire:model="amount" type="number" min="1" step="1" inputmode="numeric"
-                        class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]">
+                    <input wire:model="amount" type="number" min="1" step="1" inputmode="numeric" class="{{ $inputClass }}">
                 </x-ui.field>
 
                 <x-ui.field label="Tanggal Bayar" :error="$errors->first('payment_date')">
-                    <input wire:model="payment_date" type="date" max="{{ now()->toDateString() }}"
-                        class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]">
+                    <input wire:model="payment_date" type="date" max="{{ now()->toDateString() }}" class="{{ $inputClass }}">
                 </x-ui.field>
 
                 <x-ui.field label="Metode Pembayaran" :error="$errors->first('payment_method')">
-                    <select wire:model="payment_method" class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-[15px]">
-                        <option value="transfer">Transfer Bank</option>
-                        <option value="cash">Tunai</option>
-                        <option value="qris">QRIS</option>
-                        <option value="other">Lainnya</option>
+                    <select wire:model="payment_method" class="{{ $inputClass }} bg-white">
+                        @foreach ($methods as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
                     </select>
                 </x-ui.field>
 
                 <x-ui.field label="No. Referensi (opsional)" :error="$errors->first('reference_number')">
-                    <input wire:model="reference_number" placeholder="Contoh: 8812-3341"
-                        class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]">
+                    <input wire:model="reference_number" placeholder="Contoh: 8812-3341" class="{{ $inputClass }}">
                 </x-ui.field>
 
                 <x-ui.field label="Bukti Pembayaran (opsional, maks 2 MB)" :error="$errors->first('proof')">
@@ -84,8 +100,7 @@
                 </x-ui.field>
 
                 <x-ui.field label="Catatan (opsional)" :error="$errors->first('notes')">
-                    <input wire:model="notes" placeholder="Contoh: transfer dari rekening istri"
-                        class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]">
+                    <input wire:model="notes" placeholder="Contoh: transfer dari rekening istri" class="{{ $inputClass }}">
                 </x-ui.field>
             </div>
 
@@ -99,7 +114,7 @@
     @endif
 
     {{-- Riwayat pembayaran saya --}}
-    <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
+    <div class="{{ $cardClass }}">
         <p class="font-bold">Riwayat Pembayaran</p>
 
         <div class="mt-3 space-y-2">
@@ -114,7 +129,7 @@
                                 <p class="mt-1 text-[13px] text-red-600">Alasan ditolak: {{ $payment->rejection_reason }}</p>
                             @endif
                         </div>
-                        <x-ui.badge color="{{ $payment->statusColor() }}">{{ $payment->statusLabel() }}</x-ui.badge>
+                        <x-ui.badge :color="$payment->statusColor()">{{ $payment->statusLabel() }}</x-ui.badge>
                     </div>
 
                     @if ($payment->hasProof())

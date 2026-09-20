@@ -38,7 +38,20 @@ class Index extends Component
     public function delete(int $id): void
     {
         $this->authorize('delete', House::class);
-        $house = House::findOrFail($id);
+        $house = House::withCount(['houseResidents', 'outstandingBillings'])->findOrFail($id);
+
+        if ($house->house_residents_count > 0) {
+            session()->flash('error', 'Rumah '.$house->fullLabel().' tidak bisa dihapus karena masih ada '.$house->house_residents_count.' data warga.');
+
+            return;
+        }
+
+        if ($house->outstanding_billings_count > 0) {
+            session()->flash('error', 'Rumah '.$house->fullLabel().' tidak bisa dihapus karena masih ada '.$house->outstanding_billings_count.' tagihan belum lunas.');
+
+            return;
+        }
+
         $old = $house->toArray();
         $house->delete();
 
@@ -94,6 +107,7 @@ class Index extends Component
     public function render()
     {
         $houses = House::with(['block', 'estate', 'houseResidents.resident'])
+            ->withCount(['houseResidents', 'outstandingBillings'])
             ->when($this->search, fn ($q) => $q->where('house_number', 'like', "%{$this->search}%")->orWhere('address', 'like', "%{$this->search}%"))
             ->when($this->blockFilter, fn ($q) => $q->where('housing_block_id', $this->blockFilter))
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))

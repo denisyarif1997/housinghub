@@ -28,6 +28,7 @@ class Dashboard extends Component
                     ->orWhereHas('house.houseResidents', fn ($relation) => $relation
                         ->where('resident_id', $residentId)
                         ->where('status', 'active')))
+                ->with(['house.block', 'iplRate'])
                 ->orderByDesc('period_year')
                 ->orderByDesc('period_month')
                 ->get();
@@ -35,13 +36,24 @@ class Dashboard extends Component
 
         $outstanding = $billings->whereIn('status', ['unpaid', 'partial']);
 
-        $currentBilling = $billings->first(fn ($billing) => (int) $billing->period_month === (int) now()->month
-            && (int) $billing->period_year === (int) now()->year);
+        $overdue = $outstanding
+            ->filter(fn ($billing) => $billing->isOverdue())
+            ->sortBy(fn ($billing) => [$billing->due_date?->toDateString() ?? '', $billing->period_year, $billing->period_month])
+            ->values();
+
+        $currentBillings = $billings
+            ->filter(fn ($billing) => (int) $billing->period_month === (int) now()->month
+                && (int) $billing->period_year === (int) now()->year)
+            ->values();
+
+        $currentBilling = $currentBillings->first();
 
         return view('livewire.resident.dashboard', [
             'user' => $user,
             'house' => $house,
             'currentBilling' => $currentBilling,
+            'currentBillings' => $currentBillings,
+            'overdueBillings' => $overdue,
             'outstandingAmount' => (float) $outstanding->sum(fn ($billing) => $billing->remaining()),
             'outstandingCount' => $outstanding->count(),
         ]);

@@ -21,8 +21,8 @@
     </script>
 </head>
 <body class="bg-[#F8FAFC] text-[#0F172A]">
-<div x-data="{ sidebar: false }" class="min-h-dvh lg:flex">
-    <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-[#E2E8F0] bg-white lg:flex">
+<div x-data="{ sidebar: false }" class="min-h-dvh lg:flex lg:items-stretch">
+    <aside class="hidden w-64 shrink-0 flex-col border-r border-[#E2E8F0] bg-white lg:sticky lg:top-0 lg:flex lg:h-dvh">
         <div class="flex items-center gap-3 px-5 pb-5 pt-6">
             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0F172A] text-white">
                 <i data-lucide="home" class="h-5 w-5"></i>
@@ -130,7 +130,7 @@
     </div>
     <div class="flex min-w-0 flex-1 flex-col">
         <header class="sticky top-0 z-30 border-b border-[#E2E8F0] bg-white">
-            <div class="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+            <div class="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 lg:px-8">
                 <button @click="sidebar=true" class="flex h-11 w-11 items-center justify-center rounded-xl border lg:hidden"><i data-lucide="menu" class="h-5 w-5"></i></button>
                 <h1 class="flex-1 truncate text-lg font-bold">{{ $title }}</h1>
                 <div class="flex items-center gap-2">
@@ -144,7 +144,7 @@
                 </div>
             </div>
         </header>
-        <main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-4 lg:pb-10">{{ $slot }}</main>
+        <main class="mx-auto w-full max-w-7xl flex-1 px-4 pb-24 pt-6 lg:px-8 lg:pb-10 lg:pt-8">{{ $slot }}</main>
     </div>
 </div>
 @livewireScripts

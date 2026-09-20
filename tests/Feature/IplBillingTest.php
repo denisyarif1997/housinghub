@@ -88,6 +88,51 @@ class IplBillingTest extends TestCase
         $this->assertGreaterThan(0, $result['no_rate']);
     }
 
+    public function test_generate_new_rate_same_period_creates_additional_billing(): void
+    {
+        $firstRate = $this->makeRate(150000);
+        $service = app(IplBillingService::class);
+        $activeHouses = House::where('status', 'active')->count();
+
+        $first = $service->generate(now()->year, now()->month, null, 10, $this->admin()->id, $firstRate->id);
+
+        $this->assertSame($activeHouses, $first['created']);
+
+        // Tarif baru pada periode yang SAMA harus ikut tertagih (satu tagihan per tarif).
+        $secondRate = IplRate::create([
+            'name' => 'IPL Tambahan Test',
+            'amount' => 50000,
+            'period_type' => 'monthly',
+            'effective_date' => now()->startOfYear()->toDateString(),
+            'status' => 'active',
+        ]);
+
+        $second = $service->generate(now()->year, now()->month, null, 10, $this->admin()->id, $secondRate->id);
+
+        $this->assertSame($activeHouses, $second['created']);
+        $this->assertSame(0, $second['skipped']);
+        $this->assertSame($activeHouses * 2, Billing::forPeriod(now()->year, now()->month)->count());
+
+        // Generate ulang tarif yang sama tetap anti-duplikat.
+        $third = $service->generate(now()->year, now()->month, null, 10, $this->admin()->id, $secondRate->id);
+
+        $this->assertSame(0, $third['created']);
+        $this->assertSame($activeHouses, $third['skipped']);
+    }
+
+    public function test_generate_only_bills_selected_houses(): void
+    {
+        $rate = $this->makeRate();
+        $service = app(IplBillingService::class);
+        $houseIds = House::where('status', 'active')->limit(2)->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $result = $service->generate(now()->year, now()->month, null, 10, $this->admin()->id, $rate->id, $houseIds);
+
+        $this->assertSame(2, $result['created']);
+        $this->assertSame(2, Billing::forPeriod(now()->year, now()->month)->count());
+        $this->assertSame($houseIds, Billing::forPeriod(now()->year, now()->month)->pluck('house_id')->sort()->values()->all());
+    }
+
     public function test_verified_payment_marks_billing_as_paid_and_supports_partial(): void
     {
         $this->makeRate(200000);

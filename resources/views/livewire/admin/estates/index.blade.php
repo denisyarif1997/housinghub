@@ -86,9 +86,16 @@
                     <button type="button" wire:click="edit({{ $estate->id }})" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] text-[14px] font-semibold">
                         <i data-lucide="pencil" class="h-4 w-4"></i> Ubah
                     </button>
-                    <button type="button" wire:click="delete({{ $estate->id }})" wire:confirm="Hapus {{ $estate->name }}?" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-red-200 text-[14px] font-semibold text-red-700">
-                        <i data-lucide="trash-2" class="h-4 w-4"></i> Hapus
-                    </button>
+                    @if ($estate->houses_count > 0 || $estate->blocks_count > 0)
+                        <button type="button" disabled title="Tidak bisa dihapus karena masih ada data rumah/blok"
+                            class="flex min-h-[44px] cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 text-[14px] font-semibold text-slate-400">
+                            <i data-lucide="trash-2" class="h-4 w-4"></i> Hapus
+                        </button>
+                    @else
+                        <button type="button" wire:click="delete({{ $estate->id }})" wire:confirm="Hapus {{ $estate->name }}?" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-red-200 text-[14px] font-semibold text-red-700">
+                            <i data-lucide="trash-2" class="h-4 w-4"></i> Hapus
+                        </button>
+                    @endif
                 </div>
             </div>
         @empty
@@ -122,7 +129,11 @@
                         <td class="px-4 py-3">{{ $estate->houses_count }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-right">
                             <button type="button" wire:click="edit({{ $estate->id }})" class="font-semibold">Ubah</button>
-                            <button type="button" wire:click="delete({{ $estate->id }})" wire:confirm="Hapus {{ $estate->name }}?" class="ml-2 font-semibold text-red-600">Hapus</button>
+                            @if ($estate->houses_count > 0 || $estate->blocks_count > 0)
+                                <button type="button" disabled title="Tidak bisa dihapus karena masih ada data rumah/blok" class="ml-2 cursor-not-allowed font-semibold text-slate-400">Hapus</button>
+                            @else
+                                <button type="button" wire:click="delete({{ $estate->id }})" wire:confirm="Hapus {{ $estate->name }}?" class="ml-2 font-semibold text-red-600">Hapus</button>
+                            @endif
                         </td>
                     </tr>
                 @empty

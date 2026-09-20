@@ -17,25 +17,6 @@
         </div>
     </div>
 
-    @if ($summary['currentPeriod'])
-        @php $current = $summary['currentPeriod']; @endphp
-        <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="text-[13px] text-[#64748B]">Tagihan {{ $current->periodLabel() }}</p>
-                    <p class="mt-1 text-[20px] font-bold">@rupiah($current->total)</p>
-                    <p class="text-[13px] text-[#64748B]">Jatuh tempo {{ $current->due_date?->format('d/m/Y') }}</p>
-                </div>
-                <x-ui.badge color="{{ $current->statusColor() }}">{{ $current->statusLabel() }}</x-ui.badge>
-            </div>
-            <a href="{{ route('resident.ipl.show', $current) }}" wire:navigate
-                class="mt-3 flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white">
-                <i data-lucide="wallet" class="h-5 w-5"></i>
-                {{ $current->remaining() > 0 ? 'Bayar Sekarang' : 'Lihat Detail' }}
-            </a>
-        </div>
-    @endif
-
     {{-- Filter --}}
     <div class="grid grid-cols-2 gap-2">
         <select wire:model.live="statusFilter" class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] bg-white px-3 text-[15px]">
@@ -58,20 +39,30 @@
         @forelse ($billings as $billing)
             <a href="{{ route('resident.ipl.show', $billing) }}" wire:navigate
                 class="block rounded-2xl border border-[#E2E8F0] bg-white p-4 active:bg-slate-50">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                        <p class="text-[16px] font-bold">{{ $billing->periodLabel() }}</p>
-                        <p class="mt-0.5 font-mono text-[12px] text-[#64748B]">{{ $billing->invoice_number }}</p>
-                        <p class="text-[13px] text-[#64748B]">Rumah {{ $billing->house?->fullLabel() ?? '-' }}</p>
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-[16px] font-bold">{{ $billing->periodLabel() }}</p>
+                        <p class="mt-0.5 truncate font-mono text-[12px] text-[#64748B]">{{ $billing->invoice_number }}</p>
+                        <p class="truncate text-[13px] text-[#64748B]">Rumah {{ $billing->house?->fullLabel() ?? '-' }}</p>
                     </div>
-                    <x-ui.badge color="{{ $billing->statusColor() }}">{{ $billing->statusLabel() }}</x-ui.badge>
+                    <x-ui.badge color="{{ $billing->statusColor() }}" class="shrink-0">{{ $billing->statusLabel() }}</x-ui.badge>
                 </div>
-                <div class="mt-2 flex items-end justify-between">
-                    <div>
+                <p class="mt-2 inline-flex max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-semibold text-slate-700">
+                    <i data-lucide="tag" class="h-3.5 w-3.5 shrink-0 text-slate-500"></i>
+                    <span class="truncate">{{ $billing->iplRate?->name ?? 'Tarif tidak tercatat' }}</span>
+                </p>
+                <div class="mt-2 flex items-end justify-between gap-2">
+                    <div class="min-w-0">
                         <p class="text-[18px] font-bold">@rupiah($billing->total)</p>
                         @if ($billing->remaining() > 0 && $billing->paid_amount > 0)
                             <p class="text-[13px] text-[#64748B]">Sisa @rupiah($billing->remaining())</p>
                         @endif
+                        <p class="mt-0.5 text-[12px] text-[#64748B]">
+                            JT {{ $billing->due_date?->format('d/m/Y') ?? '-' }}
+                            @if ($billing->isOverdue())
+                                · <span class="font-semibold text-red-600">{{ $billing->due_date->startOfDay()->diffInDays(now()->startOfDay()) }} hari terlambat</span>
+                            @endif
+                        </p>
                     </div>
                     <span class="inline-flex items-center gap-1 text-[13px] font-semibold text-[#64748B]">
                         Detail <i data-lucide="chevron-right" class="h-4 w-4"></i>

@@ -27,6 +27,10 @@
                 <dd class="font-semibold">{{ $billing->periodLabel() }}</dd>
             </div>
             <div>
+                <dt class="text-[#64748B]">Tarif</dt>
+                <dd class="font-semibold">{{ $billing->iplRate?->name ?? 'Tarif tidak tercatat' }}</dd>
+            </div>
+            <div>
                 <dt class="text-[#64748B]">Jatuh Tempo</dt>
                 <dd class="font-semibold">{{ $billing->due_date?->format('d/m/Y') ?? '-' }}</dd>
             </div>

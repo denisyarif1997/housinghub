@@ -38,12 +38,17 @@
     <div class="space-y-2">
         @forelse ($blocks as $block)
             <div class="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-4">
-                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 font-bold">{{ $block->code }}</div>
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 font-bold">{{ $block->code }}</div>
                 <div class="min-w-0 flex-1">
                     <p class="truncate font-semibold">{{ $block->name }}</p>
                     <p class="text-[13px] text-[#64748B]">{{ $block->estate?->name }} • {{ $block->houses_count }} rumah</p>
                 </div>
-                <button wire:click="delete({{ $block->id }})" wire:confirm="Hapus blok ini?" class="flex h-11 w-11 items-center justify-center rounded-xl border border-red-200 text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                @if (($block->houses_count ?? 0) > 0)
+                    <button disabled title="Tidak bisa dihapus karena masih ada {{ $block->houses_count }} rumah"
+                        class="flex h-11 w-11 shrink-0 cursor-not-allowed items-center justify-center rounded-xl border border-slate-200 text-slate-400"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                @else
+                    <button wire:click="delete({{ $block->id }})" wire:confirm="Hapus blok {{ $block->code }}?" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-red-200 text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                @endif
             </div>
         @empty
             <x-ui.empty-state title="Belum ada blok" />

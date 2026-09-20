@@ -33,6 +33,9 @@
     @if (session('success'))
         <x-ui.alert type="success" icon="check-circle-2">{{ session('success') }}</x-ui.alert>
     @endif
+    @if (session('error'))
+        <x-ui.alert type="danger" icon="alert-circle">{{ session('error') }}</x-ui.alert>
+    @endif
 
     <div class="space-y-2 md:hidden">
         @forelse ($houses as $house)
@@ -47,7 +50,12 @@
                 <p class="mt-2 text-[14px] text-[#64748B]">Penghuni: <span class="font-medium text-[#0F172A]">{{ $house->houseResidents->first()?->resident?->name ?? '-' }}</span></p>
                 <div class="mt-3 grid grid-cols-2 gap-2">
                     <a href="{{ route('admin.houses.edit', $house) }}" wire:navigate class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] text-[14px] font-semibold"><i data-lucide="pencil" class="h-4 w-4"></i> Ubah</a>
-                    <button wire:click="delete({{ $house->id }})" wire:confirm="Hapus rumah {{ $house->fullLabel() }}?" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-red-200 text-[14px] font-semibold text-red-700"><i data-lucide="trash-2" class="h-4 w-4"></i> Hapus</button>
+                    @if (($house->house_residents_count ?? 0) > 0 || ($house->outstanding_billings_count ?? 0) > 0)
+                        <button disabled title="Tidak bisa dihapus karena masih ada data warga/tagihan"
+                            class="flex min-h-[44px] cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 text-[14px] font-semibold text-slate-400"><i data-lucide="trash-2" class="h-4 w-4"></i> Hapus</button>
+                    @else
+                        <button wire:click="delete({{ $house->id }})" wire:confirm="Hapus rumah {{ $house->fullLabel() }}?" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-red-200 text-[14px] font-semibold text-red-700"><i data-lucide="trash-2" class="h-4 w-4"></i> Hapus</button>
+                    @endif
                 </div>
             </div>
         @empty
@@ -69,7 +77,11 @@
                         <td class="px-4 py-3"><x-ui.badge color="{{ $house->status === 'active' ? 'green' : 'slate' }}">{{ $house->status }}</x-ui.badge></td>
                         <td class="px-4 py-3 text-right">
                             <a href="{{ route('admin.houses.edit', $house) }}" wire:navigate class="font-semibold">Ubah</a>
-                            <button wire:click="delete({{ $house->id }})" wire:confirm="Hapus rumah ini?" class="ml-3 font-semibold text-red-600">Hapus</button>
+                            @if (($house->house_residents_count ?? 0) > 0 || ($house->outstanding_billings_count ?? 0) > 0)
+                                <button disabled title="Tidak bisa dihapus karena masih ada data warga/tagihan" class="ml-3 cursor-not-allowed font-semibold text-slate-400">Hapus</button>
+                            @else
+                                <button wire:click="delete({{ $house->id }})" wire:confirm="Hapus rumah ini?" class="ml-3 font-semibold text-red-600">Hapus</button>
+                            @endif
                         </td>
                     </tr>
                 @empty

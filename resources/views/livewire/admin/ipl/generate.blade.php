@@ -12,8 +12,8 @@
     <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
         <p class="font-bold">Generate Tagihan IPL</p>
         <p class="mt-1 text-[14px] text-[#64748B]">
-            Sistem membuat tagihan untuk semua rumah aktif satu kali per periode. Tagihan yang sudah ada akan dilewati,
-            jadi tidak akan ada data ganda.
+            Pilih tarif lalu centang warga/rumah yang akan ditagih. Yang tidak dicentang tidak dibuatkan tagihan.
+            Tarif baru bisa ditagihkan ke periode yang sama tanpa menghapus tagihan lama.
         </p>
 
         <form wire:submit="generate" class="mt-4 grid gap-3 md:grid-cols-2">
@@ -42,10 +42,58 @@
                 </select>
             </x-ui.field>
 
+            <x-ui.field label="Tarif IPL" :error="$errors->first('ipl_rate_id')">
+                <select wire:model.live="ipl_rate_id" class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-[15px]">
+                    <option value="">Otomatis (tarif berlaku)</option>
+                    @foreach ($rates as $option)
+                        <option value="{{ $option->id }}">{{ $option->name }} — @rupiah($option->amount) ({{ $option->estate?->name ?? 'Semua' }})</option>
+                    @endforeach
+                </select>
+            </x-ui.field>
+
             <x-ui.field label="Tanggal Jatuh Tempo" :error="$errors->first('due_day')">
                 <input wire:model.live="due_day" type="number" min="1" max="28" inputmode="numeric"
                     class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]">
             </x-ui.field>
+
+            <div class="md:col-span-2">
+                <div class="rounded-2xl border border-[#E2E8F0] p-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <p class="font-bold">Pilih Warga yang Ditagih ({{ count($selectedHouses) }} dipilih)</p>
+                            <p class="mt-1 text-[13px] text-[#64748B]">Yang tidak dicentang tidak akan dibuatkan tagihan.</p>
+                        </div>
+                        <button type="button" wire:click="toggleSelectAll" class="rounded-xl border border-[#E2E8F0] px-3 py-2 text-[14px] font-semibold">
+                            {{ $selectAll ? 'Hapus Semua' : 'Pilih Semua' }}
+                        </button>
+                    </div>
+
+                    <div class="relative mt-3">
+                        <i data-lucide="search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]"></i>
+                        <input wire:model.live.debounce.300ms="houseSearch" placeholder="Cari rumah / warga..."
+                            class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] bg-white pl-11 pr-4 text-[15px] outline-none focus:border-[#0F172A]">
+                    </div>
+
+                    @error('selectedHouses')<p class="mt-2 text-[13px] font-semibold text-red-600">{{ $message }}</p>@enderror
+
+                    <div class="mt-3 max-h-[320px] space-y-2 overflow-y-auto pr-1">
+                        @forelse ($houses as $house)
+                            <label class="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3 py-2.5 {{ $house['billed'] ? 'bg-slate-50' : 'bg-white' }}">
+                                <input type="checkbox" wire:model.live="selectedHouses" value="{{ $house['id'] }}" class="h-5 w-5 accent-[#0F172A]">
+                                <span class="flex-1">
+                                    <span class="block text-[14px] font-bold">Rumah {{ $house['label'] }} — {{ $house['resident'] }}</span>
+                                    <span class="block text-[12px] text-[#64748B]">{{ $house['address'] ?? $house['estate'] ?? '-' }}</span>
+                                </span>
+                                @if ($house['billed'])
+                                    <span class="rounded-full bg-amber-100 px-2 py-1 text-[11px] font-bold text-amber-800">Sudah ditagih</span>
+                                @endif
+                            </label>
+                        @empty
+                            <p class="py-6 text-center text-[14px] text-[#64748B]">Tidak ada rumah aktif yang cocok.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
 
             <div class="md:col-span-2">
                 <button type="submit" wire:loading.attr="disabled"
@@ -75,12 +123,7 @@
 
     @if ($rate)
         <x-ui.alert type="info" icon="tags">
-            Tarif berlaku: <span class="font-semibold">{{ $rate->name }}</span> — @rupiah($rate->amount) ({{ $rate->periodLabel() }})
-        </x-ui.alert>
-    @else
-        <x-ui.alert type="warning" icon="alert-triangle">
-            Belum ada tarif IPL yang berlaku untuk periode ini.
-            <a href="{{ route('admin.ipl.rates.index') }}" wire:navigate class="font-semibold underline">Tambahkan tarif</a> terlebih dahulu.
+            Tarif dipakai: <span class="font-semibold">{{ $rate->name }}</span> — @rupiah($rate->amount) ({{ $rate->periodLabel() }})
         </x-ui.alert>
     @endif
 
@@ -115,8 +158,8 @@
         </div>
     @endif
 
-    <x-ui.alert type="info" icon="shield-check">
-        Anti-duplikat aktif: kombinasi <span class="font-semibold">rumah + bulan + tahun</span> bersifat unik di database,
-        sehingga generate berulang pada periode yang sama tidak akan membuat tagihan ganda.
-    </x-ui.alert>
+    {{-- <x-ui.alert type="info" icon="shield-check">
+        Anti-duplikat aktif: kombinasi <span class="font-semibold">rumah + bulan + tahun + tarif</span> bersifat unik di database,
+        sehingga generate berulang pada periode & tarif yang sama tidak akan membuat tagihan ganda.
+    </x-ui.alert> --}}
 </div>

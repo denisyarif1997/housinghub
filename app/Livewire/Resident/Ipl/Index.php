@@ -19,7 +19,7 @@ class Index extends Component
     public function mount(): void
     {
         $this->requireResident();
-        $this->yearFilter = (string) now()->year;
+        $this->yearFilter = '';
     }
 
     public function updated(string $property): void
@@ -64,15 +64,11 @@ class Index extends Component
                 ->where('period_year', now()->year)
                 ->where('status', 'paid')
                 ->sum('paid_amount'),
-            'currentPeriod' => (clone $query)
-                ->forPeriod(now()->year, now()->month)
-                ->latest('id')
-                ->first(),
         ];
 
         return view('livewire.resident.ipl.index', [
             'billings' => (clone $query)
-                ->with(['house.block'])
+                ->with(['house.block', 'iplRate'])
                 ->when($this->statusFilter, fn (Builder $q) => $q->where('status', $this->statusFilter))
                 ->when($this->yearFilter, fn (Builder $q) => $q->where('period_year', $this->yearFilter))
                 ->orderByDesc('period_year')

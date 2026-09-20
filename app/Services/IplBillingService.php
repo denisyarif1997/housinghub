@@ -11,16 +11,17 @@ use Illuminate\Support\Facades\DB;
 class IplBillingService
 {
     /**
-     * Generate tagihan IPL untuk semua rumah aktif pada satu periode.
+     * Generate tagihan IPL untuk rumah aktif pada satu periode.
      *
-     * Anti-duplikat:
-     * - Kombinasi rumah + periode bersifat unik di level database.
-     * - Rumah yang sudah punya tagihan (termasuk yang terhapus halus) akan
-     *   dilewati atau dipulihkan, tidak pernah dibuat ulang.
+     * Mendukung multi-tarif per periode:
+     * - Jika $rateId diisi: hanya tarif itu yang ditagihkan.
+     * - Jika $houseIds diisi: hanya rumah itu yang ditagihkan (checklist warga).
+     * - Anti-duplikat di level: rumah + tahun + bulan + tarif.
      *
+     * @param  array<int>|null  $houseIds
      * @return array{created:int, restored:int, skipped:int, no_rate:int, rate_name:?string, total:float}
      */
-    public function generate(int $year, int $month, ?int $estateId = null, int $dueDay = 10, ?int $userId = null): array
+    public function generate(int $year, int $month, ?int $estateId = null, int $dueDay = 10, ?int $userId = null, ?int $rateId = null, ?array $houseIds = null): array
     {
         $dueDay = min(28, max(1, $dueDay));
         $periodStart = Carbon::create($year, $month, 1)->startOfMonth();
@@ -35,18 +36,32 @@ class IplBillingService
             'total' => 0.0,
         ];
 
+        // Tarif paksa (dipilih manual di halaman Generate).
+        $forcedRate = $rateId ? IplRate::find($rateId) : null;
+
         $houses = House::query()
             ->where('status', 'active')
             ->when($estateId, fn ($query) => $query->where('housing_estate_id', $estateId))
+            ->when($houseIds !== null, fn ($query) => $query->whereIn('id', $houseIds))
             ->with(['houseResidents' => fn ($query) => $query
                 ->where('status', 'active')
                 ->orderByDesc('is_primary')
                 ->orderByDesc('is_owner')])
             ->get();
 
-        DB::transaction(function () use ($houses, $year, $month, $periodStart, $dueDate, $userId, &$result) {
+        DB::transaction(function () use ($houses, $year, $month, $periodStart, $dueDate, $userId, $forcedRate, &$result) {
             foreach ($houses as $house) {
-                $rate = IplRate::forDate((int) $house->housing_estate_id, $periodStart);
+                $rate = $forcedRate;
+
+                // Tanpa tarif paksa: pakai tarif yang berlaku untuk estate rumah ini.
+                // Jika tarif paksa milik estate lain, lewati rumah ini.
+                if ($rate && $rate->housing_estate_id && (int) $rate->housing_estate_id !== (int) $house->housing_estate_id) {
+                    $result['no_rate']++;
+
+                    continue;
+                }
+
+                $rate ??= IplRate::forDate((int) $house->housing_estate_id, $periodStart);
 
                 if (! $rate) {
                     $result['no_rate']++;
@@ -58,6 +73,7 @@ class IplBillingService
                     ->where('house_id', $house->id)
                     ->where('period_year', $year)
                     ->where('period_month', $month)
+                    ->where('ipl_rate_id', $rate->id)
                     ->first();
 
                 if ($existing && ! $existing->trashed()) {
@@ -69,7 +85,7 @@ class IplBillingService
                 $amount = (float) $rate->amount;
 
                 $payload = [
-                    'invoice_number' => $this->invoiceNumber($house, $year, $month),
+                    'invoice_number' => $this->invoiceNumber($house, $year, $month, $rate->id),
                     'house_id' => $house->id,
                     'resident_id' => $house->houseResidents->first()?->resident_id,
                     'ipl_rate_id' => $rate->id,
@@ -102,15 +118,17 @@ class IplBillingService
     }
 
     /**
-     * Nomor invoice deterministik & unik per rumah per periode.
-     * Contoh: IPL/202609/0001
+     * Nomor invoice unik per rumah per periode per tarif.
+     * Contoh: IPL/202609/0001/R02
      */
-    public function invoiceNumber(House $house, int $year, int $month): string
+    public function invoiceNumber(House $house, int $year, int $month, ?int $rateId = null): string
     {
-        return 'IPL/'
+        $base = 'IPL/'
             .$year
             .str_pad((string) $month, 2, '0', STR_PAD_LEFT)
             .'/'
             .str_pad((string) $house->id, 4, '0', STR_PAD_LEFT);
+
+        return $rateId ? $base.'/R'.str_pad((string) $rateId, 2, '0', STR_PAD_LEFT) : $base;
     }
 }
