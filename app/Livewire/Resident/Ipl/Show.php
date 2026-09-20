@@ -7,6 +7,7 @@ use App\Models\Billing;
 use App\Models\Payment;
 use App\Support\Currency;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -90,7 +91,31 @@ class Show extends Component
             return;
         }
 
-        $proofPath = $this->proof ? $this->proof->store('payment-proofs', 'public') : null;
+        // Simpan bukti bayar sebagai BLOB di database (gambar, maks 2 MB).
+        $proofBlob = null;
+        $proofMime = null;
+        $proofName = null;
+        $proofSize = null;
+
+        if ($this->proof) {
+            $proofBlob = file_get_contents($this->proof->getRealPath());
+            $proofMime = $this->proof->getMimeType() ?: 'image/jpeg';
+            $proofName = $this->proof->getClientOriginalName();
+            $proofSize = $this->proof->getSize();
+
+            // Validasi ganda: hanya gambar & maks 2 MB (2 * 1024 * 1024 byte).
+            if (! str_starts_with($proofMime, 'image/')) {
+                $this->addError('proof', 'Bukti pembayaran harus berupa gambar.');
+
+                return;
+            }
+
+            if ($proofSize > 2 * 1024 * 1024 || strlen((string) $proofBlob) > 2 * 1024 * 1024) {
+                $this->addError('proof', 'Ukuran bukti pembayaran maksimal 2 MB.');
+
+                return;
+            }
+        }
 
         $payment = Payment::create([
             'payment_number' => Payment::generateNumber($this->billing),
@@ -101,7 +126,11 @@ class Show extends Component
             'payment_date' => $data['payment_date'],
             'payment_method' => $data['payment_method'],
             'reference_number' => $data['reference_number'] ?: null,
-            'proof' => $proofPath,
+            'proof' => null,
+            'proof_blob' => $proofBlob,
+            'proof_mime' => $proofMime,
+            'proof_name' => $proofName,
+            'proof_size' => $proofSize,
             'status' => 'pending',
             'notes' => $data['notes'] ?: null,
         ]);
@@ -110,7 +139,8 @@ class Show extends Component
             'user_id' => auth()->id(), 'action' => 'create', 'module' => 'payments',
             'subject_type' => Payment::class, 'subject_id' => $payment->id,
             'description' => 'Konfirmasi pembayaran tagihan '.$this->billing->invoice_number,
-            'new_values' => $payment->toArray(),
+            // Jangan simpan BLOB ke log (bisa 2 MB) — hanya metadata bukti.
+            'new_values' => Arr::except($payment->fresh()->toArray(), ['proof_blob']),
         ]);
 
         $this->reset(['amount', 'reference_number', 'notes', 'proof']);

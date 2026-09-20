@@ -127,6 +127,45 @@ class Index extends Component
         session()->flash('success', 'Tagihan '.$billing->invoice_number.' berhasil dihapus.');
     }
 
+    public function export()
+    {
+        abort_unless(auth()->user()->hasPermission('manage-billing') || auth()->user()->hasPermission('verify-payment'), 403);
+
+        $billings = $this->filteredQuery()
+            ->with(['house.block', 'resident', 'iplRate'])
+            ->orderByDesc('period_year')
+            ->orderByDesc('period_month')
+            ->orderBy('house_id')
+            ->get();
+
+        return response()->streamDownload(function () use ($billings) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['Invoice', 'Rumah', 'Blok', 'Penghuni', 'Periode', 'Tarif', 'Total', 'Dibayar', 'Sisa', 'Status', 'Jatuh Tempo']);
+
+            foreach ($billings as $billing) {
+                fputcsv($handle, [
+                    $billing->invoice_number,
+                    $billing->house?->fullLabel() ?? '-',
+                    $billing->house?->block?->code ?? '-',
+                    $billing->resident?->name ?? '-',
+                    $billing->periodLabel(),
+                    $billing->iplRate?->name ?? '-',
+                    (string) $billing->total,
+                    (string) $billing->paid_amount,
+                    (string) $billing->remaining(),
+                    $billing->statusLabel(),
+                    $billing->due_date?->format('Y-m-d') ?? '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, 'billings.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
+    }
+
     protected function filteredQuery(): Builder
     {
         return Billing::query()

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentProofController;
 use App\Livewire\Admin\ActivityLogs\Index as ActivityLogIndex;
 use App\Livewire\Admin\Blocks\Index as BlockIndex;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
@@ -42,6 +43,9 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Bukti bayar (BLOB database, maks 2 MB). Otorisasi dicek di controller via PaymentPolicy.
+    Route::get('/payments/{payment}/proof', [PaymentProofController::class, 'show'])->name('payments.proof');
 
     Route::prefix('resident')->name('resident.')->group(function () {
         Route::get('/dashboard', ResidentDashboard::class)->name('dashboard');

@@ -60,7 +60,12 @@
                 @endforeach
             </select>
         </div>
-        <button wire:click="resetFilter" class="text-[14px] font-semibold text-[#64748B] underline">Reset filter</button>
+        <div class="flex items-center justify-between gap-2">
+            <button wire:click="resetFilter" class="text-[14px] font-semibold text-[#64748B] underline">Reset filter</button>
+            <button type="button" wire:click="export" class="flex min-h-[48px] items-center gap-2 rounded-2xl border border-[#0F172A] bg-white px-4 font-semibold text-[#0F172A]">
+                <i data-lucide="download" class="h-4 w-4"></i><span>Export</span>
+            </button>
+        </div>
     </div>
 
     {{-- Mobile list --}}

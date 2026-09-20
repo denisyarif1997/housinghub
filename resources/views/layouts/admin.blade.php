@@ -63,17 +63,22 @@
                     ]],
                 ];
 
-                // Hanya tampilkan menu (dan judul grupnya) yang boleh diakses user.
                 $sections = collect($sections)
                     ->map(function (array $section) use ($user) {
-                        $section['items'] = array_values(array_filter(
-                            $section['items'],
-                            fn (array $item) => $user->hasPermission(...$item[4])
-                        ));
+                        $visibleItems = [];
+
+                        foreach ($section['items'] as $item) {
+                            [$route, $icon, $label, $pattern, $permissions] = $item;
+                            if ($user && $user->hasPermission(...($permissions ?? []))) {
+                                $visibleItems[] = [$route, $icon, $label, $pattern];
+                            }
+                        }
+
+                        $section['items'] = $visibleItems;
 
                         return $section;
                     })
-                    ->filter(fn (array $section) => $section['items'] !== [])
+                    ->filter(fn (array $section) => ! empty($section['items']))
                     ->values()
                     ->all();
             @endphp

@@ -139,7 +139,7 @@
                         <x-ui.badge color="{{ $payment->statusColor() }}">{{ $payment->statusLabel() }}</x-ui.badge>
                     </div>
 
-                    @if ($payment->proof)
+                    @if ($payment->hasProof())
                         <a href="{{ $payment->proofUrl() }}" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-[13px] font-semibold underline">
                             <i data-lucide="image" class="h-3.5 w-3.5"></i> Lihat bukti
                         </a>

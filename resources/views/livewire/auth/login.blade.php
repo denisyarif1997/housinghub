@@ -27,13 +27,13 @@
         <button type="submit" wire:loading.attr="disabled"
             class="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#0F172A] font-semibold text-white disabled:opacity-70">
             <span wire:loading.remove>Masuk</span>
-            <span wire:loading>Memeriksa...</span>
+            {{-- <span wire:loading>Memeriksa...</span> --}}
         </button>
     </form>
 
-    <div class="mt-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 text-[13px] text-[#64748B]">
-        <p class="font-semibold text-[#0F172A]">Akun demo</p>
-        <p class="mt-1">Admin: admin@housinghub.id / password123</p>
-        <p>Warga: warga.a.1@housinghub.id / password123</p>
-    </div>
+    {{-- <div class="mt-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 text-[13px] text-[#64748B]"> --}}
+        {{-- <p class="font-semibold text-[#0F172A]">Akun demo</p> --}}
+        {{-- <p class="mt-1">Silahkan Hubungi </p> --}}
+        {{-- <p>Warga: warga.a.1@housinghub.id / password123</p> --}}
+    {{-- </div> --}}
 </div>

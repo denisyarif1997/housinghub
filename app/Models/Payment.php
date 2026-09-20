@@ -6,14 +6,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Support\Facades\Storage;
 
 class Payment extends Model
 {
     protected $fillable = [
         'payment_number', 'billing_id', 'resident_id', 'user_id', 'amount',
         'payment_date', 'payment_method', 'reference_number', 'proof',
+        'proof_blob', 'proof_mime', 'proof_name', 'proof_size',
         'status', 'verified_by', 'verified_at', 'rejection_reason', 'notes',
+    ];
+
+    protected $hidden = [
+        // Jangan pernah serialize binary bukti (bisa 2 MB) ke JSON/log.
+        'proof_blob',
     ];
 
     protected function casts(): array
@@ -88,9 +93,37 @@ class Payment extends Model
         };
     }
 
+    public function hasProof(): bool
+    {
+        // Cek ringan dulu (tanpa menyentuh bytes BLOB 2 MB).
+        if (! empty($this->proof)) {
+            return true;
+        }
+
+        if (! empty($this->proof_size) || ! empty($this->proof_mime) || ! empty($this->proof_name)) {
+            return true;
+        }
+
+        $blob = $this->proof_blob;
+
+        if (is_resource($blob)) {
+            $blob = stream_get_contents($blob);
+        }
+
+        return ! empty($blob);
+    }
+
     public function proofUrl(): ?string
     {
-        return $this->proof ? Storage::disk('public')->url($this->proof) : null;
+        if (! $this->exists && ! $this->id) {
+            return null;
+        }
+
+        if (! $this->hasProof()) {
+            return null;
+        }
+
+        return route('payments.proof', $this);
     }
 
     /**

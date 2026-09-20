@@ -3,38 +3,60 @@
     $hasFinance = $canManageBilling || $canViewPayments;
 @endphp
 
-<div class="space-y-4">
+<div class="space-y-5">
     @if ($hasStats)
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             @if ($canManageHouses)
-                <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100"><i data-lucide="house" class="h-5 w-5"></i></div>
-                    <p class="mt-3 text-2xl font-bold">{{ $totalHouses }}</p>
-                    <p class="text-[13px] text-[#64748B]">Total Rumah</p>
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue/10"><i data-lucide="house" class="h-5 w-5"></i></span>
+                        <span class="rounded-full bg-blue/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]">Rumah</span>
+                    </div>
+                    <p class="mt-5 text-3xl font-bold">{{ $totalHouses }}</p>
+                    <p class="mt-1 text-sm text-slate-200">Total unit</p>
+                    <div class="mt-3 flex items-center justify-between text-[12px] text-slate-300">
+                        <span>Aktif: {{ $activeHouses }}</span>
+                        <span>Nonaktif: {{ $inactiveHouses }}</span>
+                    </div>
                 </div>
             @endif
+
             @if ($canManageResidents)
-                <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100"><i data-lucide="users" class="h-5 w-5"></i></div>
-                    <p class="mt-3 text-2xl font-bold">{{ $totalResidents }}</p>
-                    <p class="text-[13px] text-[#64748B]">Total Warga</p>
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><i data-lucide="users" class="h-5 w-5"></i></span>
+                        <span class="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">Warga</span>
+                    </div>
+                    <p class="mt-5 text-3xl font-bold text-slate-900">{{ $totalResidents }}</p>
+                    <p class="mt-1 text-sm text-slate-500">Total terdaftar</p>
+                    <div class="mt-3 text-[12px] text-slate-500">Aktif: <span class="font-semibold text-slate-700">{{ $activeResidents }}</span></div>
                 </div>
             @endif
+
             @if ($canManageHouses)
-                <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100"><i data-lucide="layout-grid" class="h-5 w-5"></i></div>
-                    <p class="mt-3 text-2xl font-bold">{{ $totalBlocks }}</p>
-                    <p class="text-[13px] text-[#64748B]">Total Blok</p>
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-700"><i data-lucide="layout-grid" class="h-5 w-5"></i></span>
+                        <span class="rounded-full bg-violet-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-violet-700">Blok</span>
+                    </div>
+                    <p class="mt-5 text-3xl font-bold text-slate-900">{{ $totalBlocks }}</p>
+                    <p class="mt-1 text-sm text-slate-500">Total area</p>
+                    <div class="mt-3 text-[12px] text-slate-500">Tersedia untuk pengelolaan</div>
                 </div>
             @endif
+
             @if ($canManageUsers)
-                <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100"><i data-lucide="user-cog" class="h-5 w-5"></i></div>
-                    <p class="mt-3 text-2xl font-bold">{{ $totalUsers }}</p>
-                    <p class="text-[13px] text-[#64748B]">Total User</p>
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700"><i data-lucide="user-cog" class="h-5 w-5"></i></span>
+                        <span class="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">User</span>
+                    </div>
+                    <p class="mt-5 text-3xl font-bold text-slate-900">{{ $totalUsers }}</p>
+                    <p class="mt-1 text-sm text-slate-500">Akun aktif</p>
+                    <div class="mt-3 text-[12px] text-slate-500">Role & akses terkelola</div>
                 </div>
             @endif
-        </div>
+        </section>
     @endif
 
     @unless ($hasStats || $hasFinance)
@@ -43,93 +65,152 @@
     @endunless
 
     @if ($hasFinance)
-    {{-- Ringkasan IPL periode berjalan --}}
-    <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-[16px] font-bold">IPL {{ $periodLabel }}</h2>
-                <p class="text-[13px] text-[#64748B]">Periode berjalan</p>
-            </div>
-            @if ($canManageBilling)
-                <a href="{{ route('admin.ipl.billings.index') }}" wire:navigate class="text-[14px] font-semibold">Kelola Tagihan</a>
-            @endif
-        </div>
-
-        <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <div class="rounded-xl bg-slate-50 p-3">
-                <p class="text-[12px] text-[#64748B]">Total Tagihan</p>
-                <p class="mt-1 text-[18px] font-bold">@rupiah($periodTotal)</p>
-            </div>
-            <div class="rounded-xl bg-emerald-50 p-3">
-                <p class="text-[12px] text-emerald-700">Terkumpul</p>
-                <p class="mt-1 text-[18px] font-bold text-emerald-800">@rupiah($periodPaid)</p>
-            </div>
-            <div class="rounded-xl bg-red-50 p-3">
-                <p class="text-[12px] text-red-700">Tunggakan</p>
-                <p class="mt-1 text-[18px] font-bold text-red-800">@rupiah($periodOutstanding)</p>
-            </div>
-            <div class="rounded-xl bg-amber-50 p-3">
-                <p class="text-[12px] text-amber-700">Belum Lunas</p>
-                <p class="mt-1 text-[18px] font-bold text-amber-800">{{ $periodUnpaidCount }} rumah</p>
-            </div>
-        </div>
-
-        <a href="{{ route('admin.ipl.payments.index') }}" wire:navigate
-            class="mt-3 flex min-h-[44px] items-center justify-between rounded-xl border border-[#E2E8F0] px-3 text-[14px]">
-            <span class="flex items-center gap-2"><i data-lucide="clock" class="h-4 w-4"></i> Pembayaran menunggu verifikasi</span>
-            <span class="flex items-center gap-2">
-                <span class="font-semibold">@rupiah($pendingPaymentsAmount)</span>
-                <span class="rounded-full {{ $pendingPayments > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-[#64748B]' }} px-2 py-0.5 text-[12px] font-bold">{{ $pendingPayments }}</span>
-            </span>
-        </a>
-    </div>
-
-    {{-- Pembayaran terbaru --}}
-    <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-        <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-[16px] font-bold">Pembayaran Terbaru</h2>
-            <a href="{{ route('admin.ipl.payments.index') }}" wire:navigate class="text-[14px] font-semibold">Lihat Semua</a>
-        </div>
-        <div class="space-y-2">
-            @forelse ($recentPayments as $payment)
-                <div class="flex items-center gap-3 rounded-xl border border-[#E2E8F0] p-3">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100"><i data-lucide="receipt" class="h-5 w-5"></i></div>
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-[14px] font-semibold">{{ $payment->resident?->name ?? $payment->billing?->house?->fullLabel() ?? '-' }}</p>
-                        <p class="truncate text-[13px] text-[#64748B]">{{ $payment->payment_date?->format('d/m/Y') }} · {{ $payment->methodLabel() }}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[14px] font-bold">@rupiah($payment->amount)</p>
-                        <x-ui.badge color="{{ $payment->statusColor() }}">{{ $payment->statusLabel() }}</x-ui.badge>
-                    </div>
+        <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Periode berjalan</p>
+                    <h2 class="text-xl font-bold text-slate-900">IPL {{ $periodLabel }}</h2>
                 </div>
-            @empty
-                <x-ui.empty-state icon="receipt" title="Belum ada pembayaran" subtitle="Generate tagihan IPL terlebih dahulu." />
-            @endforelse
-        </div>
-    </div>
+                @if ($canManageBilling)
+                    <a href="{{ route('admin.ipl.billings.index') }}" wire:navigate class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-slate-900">
+                        Kelola Tagihan <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                    </a>
+                @endif
+            </div>
+
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                <div class="rounded-2xl bg-slate-100 p-4">
+                    <p class="text-[12px] font-medium text-slate-500">Total tagihan</p>
+                    <p class="mt-2 text-2xl font-bold text-slate-900">@rupiah($periodTotal)</p>
+                </div>
+                <div class="rounded-2xl bg-emerald-50 p-4">
+                    <p class="text-[12px] font-medium text-emerald-700">Terkumpul</p>
+                    <p class="mt-2 text-2xl font-bold text-emerald-800">@rupiah($periodPaid)</p>
+                </div>
+                <div class="rounded-2xl bg-red-50 p-4">
+                    <p class="text-[12px] font-medium text-red-700">Tunggakan</p>
+                    <p class="mt-2 text-2xl font-bold text-red-800">@rupiah($periodOutstanding)</p>
+                </div>
+                <div class="rounded-2xl bg-amber-50 p-4">
+                    <p class="text-[12px] font-medium text-amber-700">Belum lunas</p>
+                    <p class="mt-2 text-2xl font-bold text-amber-800">{{ $periodUnpaidCount }}</p>
+                </div>
+                <div class="rounded-2xl bg-sky-50 p-4">
+                    <p class="text-[12px] font-medium text-sky-700">Rasio pembayaran</p>
+                    <p class="mt-2 text-2xl font-bold text-sky-800">{{ $collectionRate }}%</p>
+                </div>
+            </div>
+
+            <div class="mt-4 grid gap-3 lg:grid-cols-2">
+                <a href="{{ route('admin.ipl.payments.index') }}" wire:navigate class="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
+                    <span class="flex items-center gap-2"><i data-lucide="clock" class="h-4 w-4"></i> Menunggu verifikasi</span>
+                    <span class="flex items-center gap-2 font-semibold text-slate-900">
+                        <span>@rupiah($pendingPaymentsAmount)</span>
+                        <span class="rounded-full {{ $pendingPayments > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-600' }} px-2 py-0.5 text-[11px] font-bold">{{ $pendingPayments }}</span>
+                    </span>
+                </a>
+
+                <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <span class="flex items-center gap-2"><i data-lucide="wallet" class="h-4 w-4"></i> Penagihan bulan ini</span>
+                    <span class="font-semibold text-slate-900">@rupiah($thisMonthPayments)</span>
+                </div>
+            </div>
+        </section>
+
+        @if ($overdueBillingsCount > 0)
+            <section class="rounded-3xl border border-rose-200 bg-rose-50 p-4 shadow-sm sm:p-5">
+                <div class="mb-3 flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-rose-500">Peringatan</p>
+                        <h3 class="text-lg font-bold text-rose-900">Tagihan terlambat</h3>
+                    </div>
+                    <span class="rounded-full bg-white px-2 py-1 text-xs font-bold text-rose-700">{{ $overdueBillingsCount }} item</span>
+                </div>
+                <div class="space-y-2">
+                    @foreach ($overdueBillings->take(3) as $billing)
+                        <div class="flex items-center justify-between rounded-2xl border border-rose-200 bg-white px-3 py-2 text-sm">
+                            <div>
+                                <p class="font-semibold text-slate-900">{{ $billing->house?->fullLabel() ?? '-' }}</p>
+                                <p class="text-slate-500">{{ $billing->resident?->name ?? '-' }} · {{ $billing->periodLabel() }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-slate-900">@rupiah($billing->total)</p>
+                                <p class="text-xs text-rose-600">Jatuh tempo {{ $billing->due_date?->format('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        <section class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+            <div class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <div class="mb-3 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-900">Pembayaran Terbaru</h2>
+                    <a href="{{ route('admin.ipl.payments.index') }}" wire:navigate class="text-sm font-semibold text-slate-700">Lihat Semua</a>
+                </div>
+                <div class="space-y-2">
+                    @forelse ($recentPayments as $payment)
+                        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 p-3">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700"><i data-lucide="receipt" class="h-5 w-5"></i></div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-slate-900">{{ $payment->resident?->name ?? $payment->billing?->house?->fullLabel() ?? '-' }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ $payment->payment_date?->format('d/m/Y') }} · {{ $payment->methodLabel() }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-slate-900">@rupiah($payment->amount)</p>
+                                <x-ui.badge color="{{ $payment->statusColor() }}">{{ $payment->statusLabel() }}</x-ui.badge>
+                            </div>
+                        </div>
+                    @empty
+                        <x-ui.empty-state icon="receipt" title="Belum ada pembayaran" subtitle="Generate tagihan IPL terlebih dahulu." />
+                    @endforelse
+                </div>
+            </div>
+
+            <div class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <div class="mb-3 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-900">Warga Terbaru</h2>
+                    <a href="{{ route('admin.residents.index') }}" wire:navigate class="text-sm font-semibold text-slate-700">Lihat Semua</a>
+                </div>
+                <div class="space-y-2">
+                    @forelse ($recentResidents as $resident)
+                        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 p-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700">{{ strtoupper(substr($resident->name, 0, 1)) }}</div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-slate-900">{{ $resident->name }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ $resident->phone ?? '-' }}</p>
+                            </div>
+                            <span class="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">{{ $resident->status ?? 'active' }}</span>
+                        </div>
+                    @empty
+                        <x-ui.empty-state icon="users" title="Belum ada warga" subtitle="Tambahkan data warga terlebih dahulu." />
+                    @endforelse
+                </div>
+            </div>
+        </section>
     @endif
 
     @if ($canManageHouses)
-    <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-        <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-[16px] font-bold">Rumah Terbaru</h2>
-            <a href="{{ route('admin.houses.index') }}" wire:navigate class="text-[14px] font-semibold">Lihat Semua</a>
-        </div>
-        <div class="space-y-2">
-            @forelse ($recentHouses as $house)
-                <div class="flex items-center gap-3 rounded-xl border border-[#E2E8F0] p-3">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 font-bold">{{ $house->block?->code }}</div>
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-[14px] font-semibold">Rumah {{ $house->fullLabel() }}</p>
-                        <p class="truncate text-[13px] text-[#64748B]">{{ $house->houseResidents->first()?->resident?->name ?? 'Belum ada penghuni' }}</p>
+        <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-900">Rumah Terbaru</h2>
+                <a href="{{ route('admin.houses.index') }}" wire:navigate class="text-sm font-semibold text-slate-700">Lihat Semua</a>
+            </div>
+            <div class="space-y-2">
+                @forelse ($recentHouses as $house)
+                    <div class="flex items-center gap-3 rounded-2xl border border-slate-200 p-3">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-700">{{ $house->block?->code }}</div>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-semibold text-slate-900">Rumah {{ $house->fullLabel() }}</p>
+                            <p class="truncate text-xs text-slate-500">{{ $house->houseResidents->first()?->resident?->name ?? 'Belum ada penghuni' }}</p>
+                        </div>
+                        <x-ui.badge color="green">{{ $house->occupancy_status }}</x-ui.badge>
                     </div>
-                    <x-ui.badge color="green">{{ $house->occupancy_status }}</x-ui.badge>
-                </div>
-            @empty
-                <x-ui.empty-state title="Belum ada rumah" subtitle="Tambahkan data rumah terlebih dahulu." />
-            @endforelse
-        </div>
-    </div>
+                @empty
+                    <x-ui.empty-state title="Belum ada rumah" subtitle="Tambahkan data rumah terlebih dahulu." />
+                @endforelse
+            </div>
+        </section>
     @endif
 </div>

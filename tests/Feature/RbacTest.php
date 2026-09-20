@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Admin\Houses\Index as HouseIndex;
+use App\Livewire\Admin\Ipl\Billings\Index as BillingIndex;
+use App\Livewire\Admin\Residents\Index as ResidentIndex;
 use App\Livewire\Admin\Roles\Index as RoleIndex;
 use App\Livewire\Admin\Users\Index as UserIndex;
 use App\Livewire\Auth\Login;
 use App\Models\Permission;
+use App\Models\Resident;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\HousingSeeder;
@@ -100,6 +104,78 @@ class RbacTest extends TestCase
 
         $user = User::where('email', 'rt01@example.com')->firstOrFail();
         $this->assertSame($role->id, (int) $user->role_id);
+    }
+
+    public function test_admin_can_export_resident_data(): void
+    {
+        Resident::create([
+            'name' => 'Budi Santoso',
+            'nik' => '3301010101010001',
+            'gender' => 'male',
+            'phone' => '08123456789',
+            'email' => 'budi@example.com',
+            'status' => 'active',
+        ]);
+
+        Livewire::actingAs($this->admin())
+            ->test(ResidentIndex::class)
+            ->set('search', 'Budi')
+            ->call('export')
+            ->assertFileDownloaded('residents.csv');
+    }
+
+    public function test_admin_can_export_house_data(): void
+    {
+        $estate = \App\Models\HousingEstate::firstOrFail();
+        $block = \App\Models\HousingBlock::firstOrFail();
+
+        \App\Models\House::create([
+            'housing_estate_id' => $estate->id,
+            'housing_block_id' => $block->id,
+            'house_number' => '99',
+            'address' => 'Jl. Export No. 99',
+            'land_area' => 100,
+            'building_area' => 80,
+            'ownership_status' => 'owner',
+            'occupancy_status' => 'occupied',
+            'status' => 'active',
+        ]);
+
+        Livewire::actingAs($this->admin())
+            ->test(HouseIndex::class)
+            ->set('search', '99')
+            ->call('export')
+            ->assertFileDownloaded('houses.csv');
+    }
+
+    public function test_admin_can_export_billing_data(): void
+    {
+        $house = \App\Models\House::firstOrFail();
+        $resident = \App\Models\Resident::firstOrFail();
+        $rate = \App\Models\IplRate::firstOrFail();
+
+        \App\Models\Billing::create([
+            'invoice_number' => 'IPL-2026-001',
+            'house_id' => $house->id,
+            'resident_id' => $resident->id,
+            'ipl_rate_id' => $rate->id,
+            'period_month' => 9,
+            'period_year' => 2026,
+            'amount' => 150000,
+            'discount' => 0,
+            'total' => 150000,
+            'paid_amount' => 0,
+            'due_date' => now()->toDateString(),
+            'status' => 'unpaid',
+            'notes' => 'Tagihan export',
+            'created_by' => $this->admin()->id,
+        ]);
+
+        Livewire::actingAs($this->admin())
+            ->test(BillingIndex::class)
+            ->set('search', 'IPL-2026-001')
+            ->call('export')
+            ->assertFileDownloaded('billings.csv');
     }
 
     public function test_user_inherits_role_permissions(): void

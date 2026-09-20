@@ -55,6 +55,41 @@ class Index extends Component
         session()->flash('success', 'Rumah berhasil dihapus.');
     }
 
+    public function export()
+    {
+        $this->authorize('viewAny', House::class);
+
+        $houses = House::with(['block', 'estate', 'houseResidents.resident'])
+            ->when($this->search, fn ($q) => $q->where('house_number', 'like', "%{$this->search}%")
+                ->orWhere('address', 'like', "%{$this->search}%"))
+            ->when($this->blockFilter, fn ($q) => $q->where('housing_block_id', $this->blockFilter))
+            ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
+            ->latest()
+            ->get();
+
+        return response()->streamDownload(function () use ($houses) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['Rumah', 'Alamat', 'Blok', 'Estate', 'Penghuni', 'Status']);
+
+            foreach ($houses as $house) {
+                fputcsv($handle, [
+                    $house->fullLabel(),
+                    $house->address ?? '',
+                    $house->block?->code ?? '',
+                    $house->estate?->name ?? '',
+                    $house->houseResidents->first()?->resident?->name ?? '',
+                    $house->status ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, 'houses.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
+    }
+
     #[Layout('layouts.admin', ['title' => 'Rumah'])]
     public function render()
     {

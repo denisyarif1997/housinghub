@@ -41,6 +41,41 @@ class Index extends Component
         session()->flash('success', 'Warga berhasil dihapus.');
     }
 
+    public function export()
+    {
+        $this->authorize('viewAny', Resident::class);
+
+        $residents = Resident::with(['houseResidents.house.block'])
+            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%")
+                ->orWhere('nik', 'like', "%{$this->search}%")
+                ->orWhere('phone', 'like', "%{$this->search}%"))
+            ->latest()
+            ->get();
+
+        return response()->streamDownload(function () use ($residents) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['Nama', 'NIK', 'Jenis Kelamin', 'Telepon', 'Email', 'Rumah', 'Status']);
+
+            foreach ($residents as $resident) {
+                fputcsv($handle, [
+                    $resident->name,
+                    $resident->nik ?? '',
+                    $resident->gender ? ucfirst($resident->gender) : '',
+                    $resident->phone ?? '',
+                    $resident->email ?? '',
+                    $resident->houseResidents->first()?->house?->fullLabel() ?? '-',
+                    $resident->status ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, 'residents.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
+    }
+
     #[Layout('layouts.admin', ['title' => 'Warga'])]
     public function render()
     {
