@@ -72,6 +72,16 @@ class Billing extends Model
         return $this->isWater() ? 'Air' : 'IPL';
     }
 
+    /**
+     * Nama tarif sesuai jenis tagihan (air memakai tarif air, IPL memakai tarif IPL).
+     */
+    public function rateName(): string
+    {
+        return $this->isWater()
+            ? ($this->waterRate?->name ?? 'Tarif air')
+            : ($this->iplRate?->name ?? 'Tarif tidak tercatat');
+    }
+
     public function scopeIpl(Builder $query): Builder
     {
         return $query->where('billing_type', 'ipl');

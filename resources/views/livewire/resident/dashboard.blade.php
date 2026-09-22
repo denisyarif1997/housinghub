@@ -37,7 +37,7 @@
                                 <x-ui.badge color="{{ $overdue->statusColor() }}" class="shrink-0">{{ $overdue->statusLabel() }}</x-ui.badge>
                             </div>
                             <p class="mt-0.5 truncate text-[12px] text-slate-500">
-                                {{ $overdue->iplRate?->name ?? 'Tarif tidak tercatat' }} · JT {{ $overdue->due_date?->format('d/m/Y') ?? '-' }}
+                                {{ $overdue->rateName() }} · JT {{ $overdue->due_date?->format('d/m/Y') ?? '-' }}
                             </p>
                             <div class="mt-1.5 flex items-center justify-between gap-2">
                                 <p class="text-[13px] font-bold text-red-700">@rupiah($overdue->remaining())</p>
@@ -58,7 +58,7 @@
                     class="block rounded-xl border border-[#E2E8F0] p-3 active:bg-slate-50">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-[14px] font-bold">{{ $billing->iplRate?->name ?? 'Tagihan IPL' }}</p>
+                            <p class="truncate text-[14px] font-bold">{{ $billing->rateName() }}</p>
                             <p class="mt-0.5 text-[13px] text-[#64748B]">Rumah {{ $billing->house?->fullLabel() ?? '-' }} · JT {{ $billing->due_date?->format('d/m/Y') }}</p>
                         </div>
                         <x-ui.badge color="{{ $billing->statusColor() }}" class="shrink-0">{{ $billing->statusLabel() }}</x-ui.badge>

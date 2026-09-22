@@ -28,7 +28,7 @@ class Dashboard extends Component
                     ->orWhereHas('house.houseResidents', fn ($relation) => $relation
                         ->where('resident_id', $residentId)
                         ->where('status', 'active')))
-                ->with(['house.block', 'iplRate'])
+                ->with(['house.block', 'iplRate', 'waterRate'])
                 ->orderByDesc('period_year')
                 ->orderByDesc('period_month')
                 ->get();
