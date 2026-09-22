@@ -31,9 +31,9 @@
         </button>
     </form>
 
-    {{-- <div class="mt-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 text-[13px] text-[#64748B]"> --}}
-        {{-- <p class="font-semibold text-[#0F172A]">Akun demo</p> --}}
-        {{-- <p class="mt-1">Silahkan Hubungi </p> --}}
-        {{-- <p>Warga: warga.a.1@housinghub.id / password123</p> --}}
-    {{-- </div> --}}
+    <div class="mt-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 text-[13px] text-[#64748B]">
+        <p class="font-semibold text-[#0F172A]">Akun demo</p>
+        <p class="mt-1">Silahkan Hubungi </p>
+        <p>Warga: warga.a.1@housinghub.id / password123</p>
+    </div>
 </div>
