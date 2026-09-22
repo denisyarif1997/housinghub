@@ -27,9 +27,27 @@
                 <dd class="font-semibold">{{ $billing->periodLabel() }}</dd>
             </div>
             <div>
-                <dt class="text-[#64748B]">Tarif</dt>
-                <dd class="font-semibold">{{ $billing->iplRate?->name ?? 'Tarif tidak tercatat' }}</dd>
+                <dt class="text-[#64748B]">Tipe</dt>
+                <dd class="font-semibold">{{ $billing->typeLabel() }}</dd>
             </div>
+            <div>
+                <dt class="text-[#64748B]">Tarif</dt>
+                <dd class="font-semibold">{{ $billing->isWater() ? ($billing->waterRate?->name ?? 'Tarif air tidak tercatat') : ($billing->iplRate?->name ?? 'Tarif tidak tercatat') }}</dd>
+            </div>
+            @if ($billing->isWater())
+                <div>
+                    <dt class="text-[#64748B]">Meter Awal</dt>
+                    <dd class="font-semibold">{{ $billing->meter_start }} m³</dd>
+                </div>
+                <div>
+                    <dt class="text-[#64748B]">Meter Akhir</dt>
+                    <dd class="font-semibold">{{ $billing->meter_end }} m³</dd>
+                </div>
+                <div>
+                    <dt class="text-[#64748B]">Pemakaian</dt>
+                    <dd class="font-semibold">{{ $billing->usage_m3 }} m³</dd>
+                </div>
+            @endif
             <div>
                 <dt class="text-[#64748B]">Jatuh Tempo</dt>
                 <dd class="font-semibold">{{ $billing->due_date?->format('d/m/Y') ?? '-' }}</dd>
@@ -65,6 +83,13 @@
             <button wire:click="cancelBilling" wire:confirm="Batalkan tagihan {{ $billing->invoice_number }}?"
                 class="mt-4 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-red-200 font-semibold text-red-700">
                 <i data-lucide="ban" class="h-4 w-4"></i> Batalkan Tagihan
+            </button>
+        @endif
+
+         @if ($billing->status == 'cancelled')
+            <button wire:click="activeBilling" wire:confirm="Aktifkan tagihan {{ $billing->invoice_number }}?"
+               class="mt-4 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#16A34A] font-semibold text-green transition hover:bg-[#15803D]">
+    <i data-lucide="check-circle-2" class="h-4 w-4"></i> Aktifkan Tagihan
             </button>
         @endif
     </div>

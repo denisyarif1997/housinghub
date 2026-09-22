@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Billing extends Model
@@ -14,9 +15,10 @@ class Billing extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'invoice_number', 'house_id', 'resident_id', 'ipl_rate_id',
-        'period_month', 'period_year', 'amount', 'discount', 'total',
+        'invoice_number', 'house_id', 'resident_id', 'ipl_rate_id', 'water_rate_id',
+        'billing_type', 'period_month', 'period_year', 'amount', 'discount', 'total',
         'paid_amount', 'due_date', 'status', 'notes', 'created_by',
+        'meter_start', 'meter_end', 'usage_m3',
     ];
 
     protected function casts(): array
@@ -29,6 +31,9 @@ class Billing extends Model
             'total' => 'decimal:2',
             'paid_amount' => 'decimal:2',
             'due_date' => 'date',
+            'meter_start' => 'decimal:2',
+            'meter_end' => 'decimal:2',
+            'usage_m3' => 'decimal:2',
         ];
     }
 
@@ -45,6 +50,36 @@ class Billing extends Model
     public function iplRate(): BelongsTo
     {
         return $this->belongsTo(IplRate::class);
+    }
+
+    public function waterRate(): BelongsTo
+    {
+        return $this->belongsTo(WaterRate::class);
+    }
+
+    public function meterReading(): HasOne
+    {
+        return $this->hasOne(WaterMeterReading::class, 'billing_id');
+    }
+
+    public function isWater(): bool
+    {
+        return ($this->billing_type ?? 'ipl') === 'water';
+    }
+
+    public function typeLabel(): string
+    {
+        return $this->isWater() ? 'Air' : 'IPL';
+    }
+
+    public function scopeIpl(Builder $query): Builder
+    {
+        return $query->where('billing_type', 'ipl');
+    }
+
+    public function scopeWater(Builder $query): Builder
+    {
+        return $query->where('billing_type', 'water');
     }
 
     public function creator(): BelongsTo

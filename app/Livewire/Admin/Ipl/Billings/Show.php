@@ -250,11 +250,27 @@ class Show extends Component
         session()->flash('success', 'Tagihan dibatalkan.');
     }
 
+    public function activeBilling(): void
+    {
+         $this->billing->update(['status' => 'unpaid']);
+
+        ActivityLog::record([
+            'user_id' => auth()->id(), 'action' => 'update', 'module' => 'billings',
+            'subject_type' => Billing::class, 'subject_id' => $this->billing->id,
+            'description' => 'Aktivasi tagihan yang di batalkan '.$this->billing->invoice_number,
+            'new_values' => $this->billing->fresh()->toArray(),
+        ]);
+
+        $this->billing->refresh();
+
+        session()->flash('success', 'Tagihan aktif kembali.');
+    }
+
     #[Layout('layouts.admin', ['title' => 'Detail Tagihan IPL'])]
     public function render()
     {
         return view('livewire.admin.ipl.billings.show', [
-            'billing' => $this->billing->load(['house.block', 'resident', 'iplRate']),
+            'billing' => $this->billing->load(['house.block', 'resident', 'iplRate', 'waterRate']),
             'payments' => $this->billing->payments()
                 ->with(['verifier', 'resident'])
                 ->orderByDesc('payment_date')

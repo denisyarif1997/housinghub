@@ -13,7 +13,7 @@
                         <span class="rounded-full bg-blue/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]">Rumah</span>
                     </div>
                     <p class="mt-5 text-3xl font-bold">{{ $totalHouses }}</p>
-                    <p class="mt-1 text-sm text-slate-200">Total unit</p>
+                    <p class="mt-1 text-sm text-slate-200">Total Rumah</p>
                     <div class="mt-3 flex items-center justify-between text-[12px] text-slate-300">
                         <span>Aktif: {{ $activeHouses }}</span>
                         <span>Nonaktif: {{ $inactiveHouses }}</span>
@@ -52,7 +52,7 @@
                         <span class="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">User</span>
                     </div>
                     <p class="mt-5 text-3xl font-bold text-slate-900">{{ $totalUsers }}</p>
-                    <p class="mt-1 text-sm text-slate-500">Akun aktif</p>
+                    <p class="mt-1 text-sm text-slate-500">Total User</p>
                     <div class="mt-3 text-[12px] text-slate-500">Role & akses terkelola</div>
                 </div>
             @endif
@@ -168,6 +168,7 @@
                 </div>
             </div>
 
+            @if ($canManageResidents)
             <div class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                 <div class="mb-3 flex items-center justify-between">
                     <h2 class="text-lg font-bold text-slate-900">Warga Terbaru</h2>
@@ -188,6 +189,7 @@
                     @endforelse
                 </div>
             </div>
+            @endif
         </section>
     @endif
 

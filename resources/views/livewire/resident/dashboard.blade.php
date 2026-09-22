@@ -13,7 +13,7 @@
     {{-- Kartu IPL --}}
     <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
         <div class="flex items-center justify-between gap-2">
-            <p class="text-[14px] font-bold">Tagihan IPL</p>
+            <p class="text-[14px] font-bold">Tagihan</p>
             <a href="{{ route('resident.ipl.index') }}" wire:navigate
                 class="inline-flex shrink-0 items-center gap-1 text-[13px] font-semibold text-[#64748B] underline">
                 Lihat semua <i data-lucide="chevron-right" class="h-4 w-4"></i>
@@ -102,7 +102,7 @@
     <div>
         <h2 class="mb-3 text-[16px] font-bold">Akses Cepat</h2>
         <div class="grid grid-cols-3 gap-3 text-center text-[13px] font-medium">
-            @foreach ([['wallet', 'IPL', 'resident.ipl.index'], ['messages-square', 'Forum', 'resident.forum.index'], ['wrench', 'Aduan', 'resident.complaints.index'], ['crown', 'Catur', 'resident.chess.index'], ['megaphone', 'Info', 'resident.info.index'], ['user', 'Profil', 'resident.profile']] as [$icon, $label, $route])
+            @foreach ([['wallet', 'Tagihan', 'resident.ipl.index'], ['messages-square', 'Forum', 'resident.forum.index'], ['wrench', 'Aduan', 'resident.complaints.index'], ['crown', 'Catur', 'resident.chess.index'], ['megaphone', 'Info', 'resident.info.index'], ['user', 'Profil', 'resident.profile']] as [$icon, $label, $route])
                 @if ($route)
                     <a href="{{ route($route) }}" wire:navigate class="flex min-h-[84px] flex-col items-center justify-center gap-2 rounded-2xl border border-[#E2E8F0] bg-white p-3">
                         <i data-lucide="{{ $icon }}" class="h-5 w-5"></i>{{ $label }}

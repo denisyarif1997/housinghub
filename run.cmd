@@ -1,0 +1,1 @@
+php artisan view:clear 2>&1 | Select-Object -First 2; php artisan test --filter=WaterBillingTest --no-ansi 2>&1 | Out-File wb_final.txt -Encoding utf8; Get-Content wb_final.txt | Select-String -Pattern 'Tests:|FAILED|✓|✗' | Select-Object -Last 25

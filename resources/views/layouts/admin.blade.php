@@ -51,6 +51,10 @@
                         ['admin.ipl.payments.index', 'receipt', 'Pembayaran', 'admin.ipl.payments.*', ['manage-payment', 'verify-payment']],
                         ['admin.ipl.rates.index', 'tags', 'Tarif IPL', 'admin.ipl.rates.*', ['manage-billing']],
                     ]],
+                    ['label' => 'Keuangan — Air', 'items' => [
+                        ['admin.water.readings', 'droplets', 'Catat Meter', 'admin.water.readings', ['manage-billing']],
+                        ['admin.water.rates.index', 'tags', 'Tarif Air', 'admin.water.rates.*', ['manage-billing']],
+                    ]],
                     ['label' => 'Info & Layanan', 'items' => [
                         ['admin.info.announcements', 'megaphone', 'Pengumuman', 'admin.info.announcements', ['manage-announcement']],
                         ['admin.info.complaints', 'message-square-warning', 'Laporan Warga', 'admin.info.complaints*', ['manage-complaint']],

@@ -1,0 +1,50 @@
+﻿
+  [39;41;1m FAIL [39;49;22m[39m Tests\Feature\WaterBillingTest[39m
+  [32;1mΓ£ô[39;22m[90m [39m[90mgenerate water billing from meter reading[39m[90m                                                                [39m [90m4.61s[39m  
+  [32;1mΓ£ô[39;22m[90m [39m[90mreject backward meter[39m[90m                                                                                    [39m [90m0.31s[39m  
+  [32;1mΓ£ô[39;22m[90m [39m[90mdraft readings saved before generating billing[39m[90m                                                           [39m [90m0.27s[39m  
+  [32;1mΓ£ô[39;22m[90m [39m[90mmeter photo compressed and stored on storage[39m[90m                                                             [39m [90m0.88s[39m  
+  [31;1mΓ¿»[39;22m[90m [39m[90mreadings page accepts photo upload and saves draft[39m[90m                                                       [39m [90m0.32s[39m  
+  [31;1mΓ¿»[39;22m[90m [39m[90mbrowser upload endpoint saves photo file[39m[90m                                                                 [39m [90m0.39s[39m  
+  [32;1mΓ£ô[39;22m[90m [39m[90mphoto can attach to existing draft without changing meter[39m[90m                                                [39m [90m0.24s[39m  
+  [32;1mΓ£ô[39;22m[90m [39m[90mwater rates page lists existing rates[39m[90m                                                                    [39m [90m0.25s[39m  
+  [31mΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\WaterBillingTest[22m [90m>[39m readings page accepts photo upload and saves draft      [41;1m ViewException [49;22m  
+[39;1m  Undefined array key "photo_src" (View: C:\Webproject\Laravel\housing\resources\views\livewire\admin\water\readings.blade.php) (View: C:\Webproject\Laravel\housing\resources\views\livewire\admin\water\readings.blade.php)[39;22m
+
+  at [32mstorage\framework\views\b1a64b1e62365ee324451e45620d6162.php[39m:[32m349[39m
+    345Γûò                         <div wire:loading wire:target="photos.<?php echo e($h['id']); ?>" class="mt-1 text-[12px] font-semibold text-amber-600">
+    346Γûò                             <i data-lucide="loader-circle" class="mr-1 inline h-3.5 w-3.5 animate-spin"></i> Mengunggah foto...
+    347Γûò                         </div>
+    348Γûò                     </div>
+  Γ₧£ 349Γûò                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(! $h['photo_src']): ?>
+    350Γûò                         <div x-show="preview" x-cloak class="col-span-2 flex items-center gap-3 rounded-xl border border-dashed border-emerald-300 bg-emerald-50 p-2">
+    351Γûò                             <button type="button" @click="zoom = 'preview'" title="Klik untuk perbesar" class="shrink-0">
+    352Γûò                                 <img :src="preview" alt="Pratinjau foto meteran" class="h-16 w-16 cursor-zoom-in rounded-lg border border-emerald-200 object-cover">
+    353Γûò                             </button>
+
+  [33m1   [39m[39;1mstorage\framework\views\b1a64b1e62365ee324451e45620d6162.php[39;22m:[39;1m349[39;22m
+  [33m2   [39m[39;1mvendor\livewire\livewire\src\Mechanisms\ExtendBlade\ExtendedCompilerEngine.php[39;22m:[39;1m58[39;22m
+
+  [31mΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ[39m  
+  [41;1m FAILED [49;22m [1mTests\Feature\WaterBillingTest[22m [90m>[39m browser upload endpoint saves photo file                [41;1m ViewException [49;22m  
+[39;1m  Undefined array key "photo_src" (View: C:\Webproject\Laravel\housing\resources\views\livewire\admin\water\readings.blade.php) (View: C:\Webproject\Laravel\housing\resources\views\livewire\admin\water\readings.blade.php)[39;22m
+
+  at [32mstorage\framework\views\b1a64b1e62365ee324451e45620d6162.php[39m:[32m349[39m
+    345Γûò                         <div wire:loading wire:target="photos.<?php echo e($h['id']); ?>" class="mt-1 text-[12px] font-semibold text-amber-600">
+    346Γûò                             <i data-lucide="loader-circle" class="mr-1 inline h-3.5 w-3.5 animate-spin"></i> Mengunggah foto...
+    347Γûò                         </div>
+    348Γûò                     </div>
+  Γ₧£ 349Γûò                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(! $h['photo_src']): ?>
+    350Γûò                         <div x-show="preview" x-cloak class="col-span-2 flex items-center gap-3 rounded-xl border border-dashed border-emerald-300 bg-emerald-50 p-2">
+    351Γûò                             <button type="button" @click="zoom = 'preview'" title="Klik untuk perbesar" class="shrink-0">
+    352Γûò                                 <img :src="preview" alt="Pratinjau foto meteran" class="h-16 w-16 cursor-zoom-in rounded-lg border border-emerald-200 object-cover">
+    353Γûò                             </button>
+
+  [33m1   [39m[39;1mstorage\framework\views\b1a64b1e62365ee324451e45620d6162.php[39;22m:[39;1m349[39;22m
+  [33m2   [39m[39;1mvendor\livewire\livewire\src\Mechanisms\ExtendBlade\ExtendedCompilerEngine.php[39;22m:[39;1m58[39;22m
+
+
+  [90mTests:[39m    [31;1m2 failed[39;22m[90m,[39m[39m [39m[32;1m6 passed[39;22m[90m (35 assertions)[39m
+  [90mDuration:[39m [39m7.75s[39m
+
