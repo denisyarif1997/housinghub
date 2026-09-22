@@ -288,7 +288,7 @@
 
                         <label class="text-[13px] text-[#64748B]">
                             Foto Meteran
-                            (JPG/PNG/WebP — otomatis dikompres maks 1MB)
+                            (JPG/PNG/WebP)
                         </label>
 
                         <input
