@@ -461,7 +461,7 @@
                             >
 
                                 <img
-                                    src="{{ \Illuminate\Support\Facades\Storage::url($h['photo_url']) }}"
+                                    src="{{ $h['photo_url'] }}"
                                     alt="Foto meteran {{ $h['label'] }}"
                                     class="h-16 w-16 cursor-zoom-in rounded-lg border border-[#E2E8F0] object-cover"
                                     loading="lazy"
@@ -530,7 +530,7 @@
                             >
 
                                 <img
-                                    src="{{ \Illuminate\Support\Facades\Storage::url($h['last_photo_url']) }}"
+                                    src="{{ $h['last_photo_url'] }}"
                                     alt="Foto bacaan sebelumnya {{ $h['label'] }}"
                                     class="h-12 w-12 cursor-zoom-in rounded-lg border border-[#E2E8F0] object-cover"
                                     loading="lazy"
@@ -597,7 +597,7 @@
                             <template x-if="zoom === 'current'">
 
                                 <img
-                                    src="{{ \Illuminate\Support\Facades\Storage::url($h['photo_url']) }}"
+                                    src="{{ $h['photo_url'] }}"
                                     alt="Foto meteran {{ $h['label'] }}"
                                     class="max-h-[75dvh] w-full rounded-xl object-contain"
                                 >
@@ -625,7 +625,7 @@
                             <template x-if="zoom === 'last'">
 
                                 <img
-                                    src="{{ \Illuminate\Support\Facades\Storage::url($h['last_photo_url']) }}"
+                                    src="{{ $h['last_photo_url'] }}"
                                     alt="Foto meteran sebelumnya {{ $h['label'] }}"
                                     class="max-h-[75dvh] w-full rounded-xl object-contain"
                                 >

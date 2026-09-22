@@ -299,7 +299,7 @@ class Readings extends Component
         $reading = WaterMeterReading::where('house_id', $houseId)
             ->where('period_year', (int) $this->period_year)
             ->where('period_month', (int) $this->period_month)->first();
-        if (! $reading || ! $reading->photo) {
+        if (! $reading || ! $reading->photo_path) {
             session()->flash('error', 'Tidak ada foto meter untuk dihapus.');
 
             return;

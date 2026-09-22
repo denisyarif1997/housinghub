@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class WaterMeterReading extends Model
 {
@@ -50,10 +49,17 @@ class WaterMeterReading extends Model
 
     /**
      * URL foto meteran yang tersimpan di disk public.
+     *
+     * Path relatif (/storage/...) agar valid di host apa pun
+     * (localhost, 127.0.0.1, maupun domain produksi).
      */
     public function photoUrl(): ?string
     {
-        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+        if (! $this->photo_path) {
+            return null;
+        }
+
+        return '/storage/'.str_replace('\\', '/', ltrim($this->photo_path, '/'));
     }
 
     /**
