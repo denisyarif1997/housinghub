@@ -4,6 +4,8 @@ namespace App\Livewire\Admin\Ipl\Billings;
 
 use App\Models\ActivityLog;
 use App\Models\Billing;
+use App\Models\CashAccount;
+use App\Models\CashTransaction;
 use App\Models\HousingBlock;
 use App\Models\Payment;
 use App\Support\Currency;
@@ -28,6 +30,10 @@ class Index extends Component
     public string $periodMonth = '';
 
     public string $periodYear = '';
+
+    public ?int $markPaidId = null;
+
+    public string $markPaid_cash_account_id = '';
 
     public function mount(): void
     {
@@ -54,9 +60,9 @@ class Index extends Component
     }
 
     /**
-     * Tandai tagihan lunas & catat pembayaran tunai (tanpa verifikasi ulang).
+     * Buka popup tandai lunas: pilih kas tujuan pemasukan.
      */
-    public function markPaid(int $id): void
+    public function startMarkPaid(int $id): void
     {
         abort_unless(auth()->user()->hasPermission('manage-payment'), 403);
 
@@ -68,16 +74,49 @@ class Index extends Component
             return;
         }
 
-        $amount = $billing->remaining();
-
-        if ($amount <= 0) {
+        if ($billing->remaining() <= 0) {
             session()->flash('error', 'Tidak ada sisa tagihan yang perlu dibayar.');
 
             return;
         }
 
-        DB::transaction(function () use ($billing, $amount) {
-            Payment::create([
+        $this->markPaidId = $id;
+        $this->markPaid_cash_account_id = '';
+        $this->resetValidation('markPaid_cash_account_id');
+    }
+
+    public function cancelMarkPaid(): void
+    {
+        $this->reset(['markPaidId', 'markPaid_cash_account_id']);
+        $this->resetValidation('markPaid_cash_account_id');
+    }
+
+    public function confirmMarkPaid(): void
+    {
+        abort_unless(auth()->user()->hasPermission('manage-payment'), 403);
+
+        if (! $this->markPaidId) {
+            return;
+        }
+
+        $data = $this->validate([
+            'markPaid_cash_account_id' => ['nullable', 'exists:cash_accounts,id'],
+        ]);
+
+        $billing = Billing::findOrFail($this->markPaidId);
+        $amount = $billing->remaining();
+
+        if ($amount <= 0) {
+            session()->flash('error', 'Tidak ada sisa tagihan yang perlu dibayar.');
+            $this->cancelMarkPaid();
+
+            return;
+        }
+
+        $account = $data['markPaid_cash_account_id'] ? CashAccount::findOrFail($data['markPaid_cash_account_id']) : null;
+
+        DB::transaction(function () use ($billing, $amount, $account) {
+            $payment = Payment::create([
                 'payment_number' => Payment::generateNumber($billing),
                 'billing_id' => $billing->id,
                 'resident_id' => $billing->resident_id,
@@ -91,15 +130,32 @@ class Index extends Component
                 'notes' => 'Dicatat manual oleh pengelola.',
             ]);
 
+            $cashEntry = null;
+            if ($account) {
+                $cashEntry = CashTransaction::recordForPayment($payment, $account, (int) auth()->id());
+
+                if ($cashEntry) {
+                    ActivityLog::record([
+                        'user_id' => auth()->id(), 'action' => 'create', 'module' => 'cash_transactions',
+                        'subject_type' => CashTransaction::class, 'subject_id' => $cashEntry->id,
+                        'description' => 'Kas masuk otomatis dari pembayaran '.$payment->payment_number.' ke '.$account->name,
+                        'new_values' => $cashEntry->toArray(),
+                    ]);
+                }
+            }
+
             $billing->syncPaymentStatus();
 
             ActivityLog::record([
                 'user_id' => auth()->id(), 'action' => 'update', 'module' => 'billings',
                 'subject_type' => Billing::class, 'subject_id' => $billing->id,
-                'description' => 'Menandai lunas tagihan '.$billing->invoice_number,
+                'description' => 'Menandai lunas tagihan '.$billing->invoice_number
+                    .($account ? ' (masuk kas '.$account->name.')' : ' (tanpa pencatatan kas)'),
                 'new_values' => $billing->fresh()->toArray(),
             ]);
         });
+
+        $this->cancelMarkPaid();
 
         session()->flash('success', 'Tagihan '.$billing->invoice_number.' ditandai lunas.');
     }
@@ -108,25 +164,34 @@ class Index extends Component
     {
         abort_unless(auth()->user()->hasPermission('manage-billing'), 403);
 
-        $billing = Billing::withCount('verifiedPayments')->findOrFail($id);
+        $billing = Billing::with('verifiedPayments')->findOrFail($id);
 
-        if ($billing->verified_payments_count > 0) {
-            session()->flash('error', 'Tagihan tidak bisa dihapus karena sudah memiliki pembayaran terverifikasi. Batalkan tagihan terlebih dahulu.');
+        DB::transaction(function () use ($billing) {
+            // Balikkan semua kas masuk dari pembayaran terverifikasi tagihan ini.
+            $reversedCount = 0;
+            foreach ($billing->verifiedPayments as $payment) {
+                $reversedCount += CashTransaction::reverseForPayment($payment, (int) auth()->id());
 
-            return;
-        }
+                ActivityLog::record([
+                    'user_id' => auth()->id(), 'action' => 'create', 'module' => 'cash_transactions',
+                    'subject_type' => Payment::class, 'subject_id' => $payment->id,
+                    'description' => 'Pembalikan kas masuk pembayaran '.$payment->payment_number.' (tagihan dihapus)',
+                ]);
+            }
 
-        $old = $billing->toArray();
-        $billing->delete();
+            $old = $billing->toArray();
+            $billing->delete();
 
-        ActivityLog::record([
-            'user_id' => auth()->id(), 'action' => 'delete', 'module' => 'billings',
-            'subject_type' => Billing::class, 'subject_id' => $id,
-            'description' => 'Menghapus tagihan '.$billing->invoice_number,
-            'old_values' => $old,
-        ]);
+            ActivityLog::record([
+                'user_id' => auth()->id(), 'action' => 'delete', 'module' => 'billings',
+                'subject_type' => Billing::class, 'subject_id' => $billing->id,
+                'description' => 'Menghapus tagihan '.$billing->invoice_number
+                    .($reversedCount > 0 ? ' (pembayaran dikembalikan ke kas)' : ''),
+                'old_values' => $old,
+            ]);
+        });
 
-        session()->flash('success', 'Tagihan '.$billing->invoice_number.' berhasil dihapus.');
+        session()->flash('success', 'Tagihan '.$billing->invoice_number.' berhasil dihapus. Pembayaran yang sudah masuk kas telah dibalikkan.');
     }
 
     public function export()
@@ -206,6 +271,7 @@ class Index extends Component
             'blocks' => HousingBlock::orderBy('code')->get(),
             'months' => Currency::MONTHS,
             'summary' => $summary,
+            'cashAccounts' => CashAccount::active()->orderBy('name')->get(),
         ]);
     }
 }

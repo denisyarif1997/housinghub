@@ -102,7 +102,7 @@
                 <div class="mt-3 grid grid-cols-2 gap-2">
                     <a href="{{ route('admin.ipl.billings.show', $billing) }}" wire:navigate class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] text-[14px] font-semibold"><i data-lucide="eye" class="h-4 w-4"></i> Detail</a>
                     @if ($billing->status !== 'paid' && $billing->status !== 'cancelled')
-                        <button wire:click="markPaid({{ $billing->id }})" wire:confirm="Tandai tagihan {{ $billing->invoice_number }} sebagai lunas?" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-emerald-200 text-[14px] font-semibold text-emerald-700"><i data-lucide="check-circle-2" class="h-4 w-4"></i> Lunas</button>
+                        <button wire:click="startMarkPaid({{ $billing->id }})" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-emerald-200 text-[14px] font-semibold text-emerald-700"><i data-lucide="check-circle-2" class="h-4 w-4"></i> Lunas</button>
                     @else
                         <button wire:click="delete({{ $billing->id }})" wire:confirm="Hapus tagihan {{ $billing->invoice_number }}?" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-red-200 text-[14px] font-semibold text-red-700"><i data-lucide="trash-2" class="h-4 w-4"></i> Hapus</button>
                     @endif
@@ -151,7 +151,7 @@
                         <td class="whitespace-nowrap px-5 py-4 text-right">
                             <a href="{{ route('admin.ipl.billings.show', $billing) }}" wire:navigate class="font-semibold">Detail</a>
                             @if ($billing->status !== 'paid' && $billing->status !== 'cancelled')
-                                <button wire:click="markPaid({{ $billing->id }})" wire:confirm="Tandai lunas?" class="ml-4 font-semibold text-emerald-700">Lunas</button>
+                                <button wire:click="startMarkPaid({{ $billing->id }})" class="ml-4 font-semibold text-emerald-700">Lunas</button>
                             @endif
                             <button wire:click="delete({{ $billing->id }})" wire:confirm="Hapus tagihan ini?" class="ml-4 font-semibold text-red-600">Hapus</button>
                         </td>
@@ -164,4 +164,40 @@
     </div>
 
     <div>{{ $billings->links() }}</div>
+
+    {{-- Popup tandai lunas: pilih kas tujuan pemasukan --}}
+    @if ($markPaidId)
+        <div class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+            <div class="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <p class="font-bold">Tandai Tagihan Lunas</p>
+                        <p class="text-[13px] text-[#64748B]">Pembayaran tunai akan langsung terverifikasi dan dicatat sebagai kas masuk.</p>
+                    </div>
+                    <button wire:click="cancelMarkPaid" class="flex h-9 w-9 items-center justify-center rounded-xl border"><i data-lucide="x" class="h-4 w-4"></i></button>
+                </div>
+
+                <form wire:submit="confirmMarkPaid" class="mt-3 space-y-3">
+                    <x-ui.field label="Masuk ke Kas" :error="$errors->first('markPaid_cash_account_id')">
+                        <select wire:model="markPaid_cash_account_id" class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-[15px]">
+                            <option value="">— Tanpa pencatatan kas —</option>
+                            @foreach ($cashAccounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->name }} (Saldo @rupiah($account->currentBalance()))</option>
+                            @endforeach
+                        </select>
+                    </x-ui.field>
+
+                    @if ($cashAccounts->isEmpty())
+                        <p class="rounded-xl bg-amber-50 p-3 text-[13px] text-amber-700">Belum ada kas terdaftar. Tagihan tetap bisa ditandai lunas tanpa pencatatan kas.</p>
+                    @endif
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" wire:click="cancelMarkPaid" class="min-h-[44px] rounded-xl border border-[#E2E8F0] bg-white font-semibold">Batal</button>
+                        <button type="submit" wire:loading.attr="disabled" class="min-h-[44px] rounded-xl bg-emerald-600 font-semibold text-white disabled:opacity-60">Tandai Lunas</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+</div>
 </div>

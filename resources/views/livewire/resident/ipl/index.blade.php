@@ -6,11 +6,11 @@
         <x-ui.alert type="danger" icon="alert-circle">{{ session('error') }}</x-ui.alert>
     @endif
 
-    {{-- Ringkasan tagihan aktif --}}
+    {{-- Ringkasan Iuran aktif --}}
     <div class="rounded-2xl bg-[#0F172A] p-4 text-white">
-        <p class="text-[13px] text-white/70">Total Tagihan Belum Lunas</p>
+        <p class="text-[13px] text-white/70">Total Iuran Belum Lunas</p>
         <p class="mt-1 text-[28px] font-bold">@rupiah($summary['outstandingAmount'])</p>
-        <p class="text-[13px] text-white/70">{{ $summary['outstandingCount'] }} tagihan menunggu pembayaran</p>
+        <p class="text-[13px] text-white/70">{{ $summary['outstandingCount'] }} Iuran menunggu pembayaran</p>
         <div class="mt-3 flex items-center justify-between rounded-xl bg-white/10 p-3 text-[13px]">
             <span>Sudah dibayar tahun {{ now()->year }}</span>
             <span class="font-bold">@rupiah($summary['paidThisYear'])</span>
@@ -39,7 +39,7 @@
         </select>
     </div>
 
-    {{-- Daftar tagihan --}}
+    {{-- Daftar Iuran --}}
     <div class="space-y-2">
         @forelse ($billings as $billing)
             <a href="{{ route('resident.ipl.show', $billing) }}" wire:navigate
@@ -78,8 +78,8 @@
                 </div>
             </a>
         @empty
-            <x-ui.empty-state icon="file-text" title="Belum ada tagihan IPL"
-                subtitle="Tagihan akan muncul setelah pengelola melakukan generate periode." />
+            <x-ui.empty-state icon="file-text" title="Belum ada Iuran IPL"
+                subtitle="Iuran akan muncul setelah pengelola melakukan generate periode." />
         @endforelse
     </div>
 

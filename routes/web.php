@@ -4,19 +4,21 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentProofController;
 use App\Livewire\Admin\ActivityLogs\Index as ActivityLogIndex;
 use App\Livewire\Admin\Blocks\Index as BlockIndex;
+use App\Livewire\Admin\Cash\Accounts\Index as CashAccountIndex;
+use App\Livewire\Admin\Cash\Transactions\Index as CashTransactionIndex;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\Estates\Index as EstateIndex;
 use App\Livewire\Admin\Forum\Index as AdminForumIndex;
 use App\Livewire\Admin\Houses\Form as HouseForm;
 use App\Livewire\Admin\Houses\Index as HouseIndex;
+use App\Livewire\Admin\Info\Announcements as InfoAnnouncements;
+use App\Livewire\Admin\Info\ComplaintDetail as InfoComplaintDetail;
+use App\Livewire\Admin\Info\Complaints as InfoComplaints;
 use App\Livewire\Admin\Ipl\Billings\Index as BillingIndex;
 use App\Livewire\Admin\Ipl\Billings\Show as BillingShow;
 use App\Livewire\Admin\Ipl\Generate as BillingGenerate;
 use App\Livewire\Admin\Ipl\Payments\Index as PaymentIndex;
 use App\Livewire\Admin\Ipl\Rates\Index as IplRateIndex;
-use App\Livewire\Admin\Info\Announcements as InfoAnnouncements;
-use App\Livewire\Admin\Info\ComplaintDetail as InfoComplaintDetail;
-use App\Livewire\Admin\Info\Complaints as InfoComplaints;
 use App\Livewire\Admin\Residents\Form as ResidentForm;
 use App\Livewire\Admin\Residents\Index as ResidentIndex;
 use App\Livewire\Admin\Roles\Index as RoleIndex;
@@ -89,6 +91,11 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::get('/readings', WaterReadings::class)->name('readings')->middleware('permission:manage-billing');
         });
 
+        Route::prefix('cash')->name('cash.')->group(function () {
+            Route::get('/accounts', CashAccountIndex::class)->name('accounts.index')->middleware('permission:manage-finance');
+            Route::get('/transactions', CashTransactionIndex::class)->name('transactions.index')->middleware('permission:manage-finance');
+        });
+
         Route::prefix('info')->name('info.')->group(function () {
             Route::get('/announcements', InfoAnnouncements::class)->name('announcements')->middleware('permission:manage-announcement');
             Route::get('/complaints', InfoComplaints::class)->name('complaints')->middleware('permission:manage-complaint');
@@ -100,4 +107,3 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/activity-logs', ActivityLogIndex::class)->name('activity-logs.index')->middleware('permission:view-activity-log');
     });
 });
-

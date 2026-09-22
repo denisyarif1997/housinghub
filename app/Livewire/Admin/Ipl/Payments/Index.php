@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Ipl\Payments;
 
 use App\Models\ActivityLog;
+use App\Models\CashAccount;
+use App\Models\CashTransaction;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +24,10 @@ class Index extends Component
 
     public string $rejection_reason = '';
 
+    public ?int $verifyingId = null;
+
+    public string $cash_account_id = '';
+
     public function mount(): void
     {
         abort_unless(
@@ -39,11 +45,14 @@ class Index extends Component
         }
     }
 
-    public function verify(int $id): void
+    /**
+     * Buka popup verifikasi: pilih kas tujuan pemasukan.
+     */
+    public function startVerify(int $id): void
     {
         $this->authorize('verify', Payment::class);
 
-        $payment = Payment::with('billing')->findOrFail($id);
+        $payment = Payment::findOrFail($id);
 
         if ($payment->status === 'verified') {
             session()->flash('error', 'Pembayaran sudah terverifikasi.');
@@ -51,7 +60,41 @@ class Index extends Component
             return;
         }
 
-        DB::transaction(function () use ($payment) {
+        $this->verifyingId = $id;
+        $this->cash_account_id = '';
+        $this->resetValidation('cash_account_id');
+    }
+
+    public function cancelVerify(): void
+    {
+        $this->reset(['verifyingId', 'cash_account_id']);
+        $this->resetValidation('cash_account_id');
+    }
+
+    public function confirmVerify(): void
+    {
+        $this->authorize('verify', Payment::class);
+
+        if (! $this->verifyingId) {
+            return;
+        }
+
+        $data = $this->validate([
+            'cash_account_id' => ['nullable', 'exists:cash_accounts,id'],
+        ]);
+
+        $payment = Payment::with(['billing', 'resident'])->findOrFail($this->verifyingId);
+
+        if ($payment->status === 'verified') {
+            session()->flash('error', 'Pembayaran sudah terverifikasi.');
+            $this->cancelVerify();
+
+            return;
+        }
+
+        $account = $data['cash_account_id'] ? CashAccount::findOrFail($data['cash_account_id']) : null;
+
+        DB::transaction(function () use ($payment, $account) {
             $payment->update([
                 'status' => 'verified',
                 'verified_by' => auth()->id(),
@@ -59,17 +102,35 @@ class Index extends Component
                 'rejection_reason' => null,
             ]);
 
+            $cashEntry = null;
+            if ($account) {
+                $cashEntry = CashTransaction::recordForPayment($payment, $account, (int) auth()->id());
+
+                if ($cashEntry) {
+                    ActivityLog::record([
+                        'user_id' => auth()->id(), 'action' => 'create', 'module' => 'cash_transactions',
+                        'subject_type' => CashTransaction::class, 'subject_id' => $cashEntry->id,
+                        'description' => 'Kas masuk otomatis dari pembayaran '.$payment->payment_number.' ke '.$account->name,
+                        'new_values' => $cashEntry->toArray(),
+                    ]);
+                }
+            }
+
             $payment->billing?->syncPaymentStatus();
 
             ActivityLog::record([
                 'user_id' => auth()->id(), 'action' => 'approve', 'module' => 'payments',
                 'subject_type' => Payment::class, 'subject_id' => $payment->id,
-                'description' => 'Memverifikasi pembayaran '.$payment->payment_number,
+                'description' => 'Memverifikasi pembayaran '.$payment->payment_number
+                    .($account ? ' (masuk kas '.$account->name.')' : ' (tanpa pencatatan kas)'),
                 'new_values' => $payment->fresh()->toArray(),
             ]);
         });
 
-        session()->flash('success', 'Pembayaran '.$payment->payment_number.' berhasil diverifikasi.');
+        $number = $payment->payment_number;
+        $this->cancelVerify();
+
+        session()->flash('success', 'Pembayaran '.$number.' berhasil diverifikasi.');
     }
 
     public function startReject(int $id): void
@@ -100,7 +161,7 @@ class Index extends Component
             'rejection_reason.required' => 'Alasan penolakan wajib diisi.',
         ]);
 
-        $payment = Payment::with('billing')->findOrFail($this->rejectingId);
+        $payment = Payment::with(['billing', 'resident'])->findOrFail($this->rejectingId);
 
         DB::transaction(function () use ($payment, $data) {
             $payment->update([
@@ -109,6 +170,9 @@ class Index extends Component
                 'verified_at' => now(),
                 'rejection_reason' => $data['rejection_reason'],
             ]);
+
+            // Balikkan kas masuk bila pembayaran sebelumnya sudah dicatat ke kas.
+            CashTransaction::reverseForPayment($payment, (int) auth()->id());
 
             $payment->billing?->syncPaymentStatus();
 
@@ -180,6 +244,7 @@ class Index extends Component
                 ->orderByDesc('payment_date')
                 ->orderByDesc('id')
                 ->paginate(15),
+            'accounts' => CashAccount::active()->orderBy('name')->get(),
             'summary' => [
                 'pending' => Payment::where('status', 'pending')->count(),
                 'pendingAmount' => (float) Payment::where('status', 'pending')->sum('amount'),

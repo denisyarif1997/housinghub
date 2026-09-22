@@ -4,6 +4,8 @@ namespace App\Livewire\Admin\Ipl\Billings;
 
 use App\Models\ActivityLog;
 use App\Models\Billing;
+use App\Models\CashAccount;
+use App\Models\CashTransaction;
 use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -26,6 +28,12 @@ class Show extends Component
     public ?int $rejectingId = null;
 
     public string $rejection_reason = '';
+
+    public ?int $verifyingId = null;
+
+    public string $cash_account_id = '';
+
+    public string $payment_cash_account_id = '';
 
     public function mount(Billing $billing): void
     {
@@ -59,6 +67,7 @@ class Show extends Component
             'payment_date' => ['required', 'date'],
             'reference_number' => ['nullable', 'string', 'max:100'],
             'payment_notes' => ['nullable', 'string', 'max:500'],
+            'payment_cash_account_id' => ['nullable', 'exists:cash_accounts,id'],
         ], [
             'payment_amount.required' => 'Nominal pembayaran wajib diisi.',
             'payment_amount.min' => 'Nominal pembayaran harus lebih dari 0.',
@@ -66,9 +75,10 @@ class Show extends Component
         ]);
 
         $billing = $this->billing;
+        $account = $data['payment_cash_account_id'] ? CashAccount::findOrFail($data['payment_cash_account_id']) : null;
 
-        DB::transaction(function () use ($billing, $data) {
-            Payment::create([
+        DB::transaction(function () use ($billing, $data, $account) {
+            $payment = Payment::create([
                 'payment_number' => Payment::generateNumber($billing),
                 'billing_id' => $billing->id,
                 'resident_id' => $billing->resident_id,
@@ -83,25 +93,43 @@ class Show extends Component
                 'notes' => $data['payment_notes'] ?: 'Dicatat manual oleh pengelola.',
             ]);
 
+            $cashEntry = null;
+            if ($account) {
+                $cashEntry = CashTransaction::recordForPayment($payment, $account, (int) auth()->id());
+
+                if ($cashEntry) {
+                    ActivityLog::record([
+                        'user_id' => auth()->id(), 'action' => 'create', 'module' => 'cash_transactions',
+                        'subject_type' => CashTransaction::class, 'subject_id' => $cashEntry->id,
+                        'description' => 'Kas masuk otomatis dari pembayaran '.$payment->payment_number.' ke '.$account->name,
+                        'new_values' => $cashEntry->toArray(),
+                    ]);
+                }
+            }
+
             $billing->syncPaymentStatus();
 
             ActivityLog::record([
                 'user_id' => auth()->id(), 'action' => 'create', 'module' => 'payments',
                 'subject_type' => Billing::class, 'subject_id' => $billing->id,
-                'description' => 'Mencatat pembayaran IPL '.$billing->invoice_number,
+                'description' => 'Mencatat pembayaran IPL '.$billing->invoice_number
+                    .($account ? ' (masuk kas '.$account->name.')' : ' (tanpa pencatatan kas)'),
                 'new_values' => $billing->fresh()->toArray(),
             ]);
         });
 
         $this->billing->refresh();
-        $this->reset(['payment_amount', 'reference_number', 'payment_notes']);
+        $this->reset(['payment_amount', 'reference_number', 'payment_notes', 'payment_cash_account_id']);
         $this->payment_amount = (string) $this->billing->remaining();
         $this->payment_date = now()->toDateString();
 
         session()->flash('success', 'Pembayaran berhasil dicatat.');
     }
 
-    public function verifyPayment(int $id): void
+    /**
+     * Buka popup verifikasi: pilih kas tujuan pemasukan.
+     */
+    public function startVerify(int $id): void
     {
         $this->authorize('verify', Payment::class);
 
@@ -113,7 +141,41 @@ class Show extends Component
             return;
         }
 
-        DB::transaction(function () use ($payment) {
+        $this->verifyingId = $id;
+        $this->cash_account_id = '';
+        $this->resetValidation('cash_account_id');
+    }
+
+    public function cancelVerify(): void
+    {
+        $this->reset(['verifyingId', 'cash_account_id']);
+        $this->resetValidation('cash_account_id');
+    }
+
+    public function confirmVerify(): void
+    {
+        $this->authorize('verify', Payment::class);
+
+        if (! $this->verifyingId) {
+            return;
+        }
+
+        $data = $this->validate([
+            'cash_account_id' => ['nullable', 'exists:cash_accounts,id'],
+        ]);
+
+        $payment = Payment::with(['billing', 'resident'])->where('billing_id', $this->billing->id)->findOrFail($this->verifyingId);
+
+        if ($payment->status === 'verified') {
+            session()->flash('error', 'Pembayaran sudah terverifikasi.');
+            $this->cancelVerify();
+
+            return;
+        }
+
+        $account = $data['cash_account_id'] ? CashAccount::findOrFail($data['cash_account_id']) : null;
+
+        DB::transaction(function () use ($payment, $account) {
             $payment->update([
                 'status' => 'verified',
                 'verified_by' => auth()->id(),
@@ -121,18 +183,34 @@ class Show extends Component
                 'rejection_reason' => null,
             ]);
 
+            $cashEntry = null;
+            if ($account) {
+                $cashEntry = CashTransaction::recordForPayment($payment, $account, (int) auth()->id());
+
+                if ($cashEntry) {
+                    ActivityLog::record([
+                        'user_id' => auth()->id(), 'action' => 'create', 'module' => 'cash_transactions',
+                        'subject_type' => CashTransaction::class, 'subject_id' => $cashEntry->id,
+                        'description' => 'Kas masuk otomatis dari pembayaran '.$payment->payment_number.' ke '.$account->name,
+                        'new_values' => $cashEntry->toArray(),
+                    ]);
+                }
+            }
+
             $this->billing->syncPaymentStatus();
 
             ActivityLog::record([
                 'user_id' => auth()->id(), 'action' => 'approve', 'module' => 'payments',
                 'subject_type' => Payment::class, 'subject_id' => $payment->id,
-                'description' => 'Memverifikasi pembayaran '.$payment->payment_number,
+                'description' => 'Memverifikasi pembayaran '.$payment->payment_number
+                    .($account ? ' (masuk kas '.$account->name.')' : ' (tanpa pencatatan kas)'),
                 'new_values' => $payment->fresh()->toArray(),
             ]);
         });
 
         $this->billing->refresh();
         $this->payment_amount = (string) $this->billing->remaining();
+        $this->cancelVerify();
 
         session()->flash('success', 'Pembayaran '.$payment->payment_number.' berhasil diverifikasi.');
     }
@@ -174,6 +252,9 @@ class Show extends Component
                 'verified_at' => now(),
                 'rejection_reason' => $data['rejection_reason'],
             ]);
+
+            // Balikkan kas masuk bila pembayaran sebelumnya sudah dicatat ke kas.
+            CashTransaction::reverseForPayment($payment, (int) auth()->id());
 
             $this->billing->syncPaymentStatus();
 
@@ -230,29 +311,41 @@ class Show extends Component
     {
         $this->authorize('update', $this->billing);
 
-        if ($this->billing->verifiedPayments()->exists()) {
-            session()->flash('error', 'Tagihan sudah memiliki pembayaran terverifikasi sehingga tidak bisa dibatalkan.');
+        $verifiedPayments = $this->billing->verifiedPayments()->get();
 
-            return;
-        }
+        DB::transaction(function () use ($verifiedPayments) {
+            // Balikkan semua kas masuk yang berasal dari pembayaran tagihan ini.
+            foreach ($verifiedPayments as $payment) {
+                $reversed = CashTransaction::reverseForPayment($payment, (int) auth()->id());
 
-        $this->billing->update(['status' => 'cancelled']);
+                if ($reversed > 0) {
+                    ActivityLog::record([
+                        'user_id' => auth()->id(), 'action' => 'create', 'module' => 'cash_transactions',
+                        'subject_type' => Payment::class, 'subject_id' => $payment->id,
+                        'description' => 'Pembalikan kas masuk pembayaran '.$payment->payment_number.' (tagihan dibatalkan)',
+                    ]);
+                }
+            }
 
-        ActivityLog::record([
-            'user_id' => auth()->id(), 'action' => 'update', 'module' => 'billings',
-            'subject_type' => Billing::class, 'subject_id' => $this->billing->id,
-            'description' => 'Membatalkan tagihan '.$this->billing->invoice_number,
-            'new_values' => $this->billing->fresh()->toArray(),
-        ]);
+            $this->billing->update(['status' => 'cancelled']);
+
+            ActivityLog::record([
+                'user_id' => auth()->id(), 'action' => 'update', 'module' => 'billings',
+                'subject_type' => Billing::class, 'subject_id' => $this->billing->id,
+                'description' => 'Membatalkan tagihan '.$this->billing->invoice_number
+                    .($verifiedPayments->isNotEmpty() ? ' (pembayaran dikembalikan ke kas)' : ''),
+                'new_values' => $this->billing->fresh()->toArray(),
+            ]);
+        });
 
         $this->billing->refresh();
 
-        session()->flash('success', 'Tagihan dibatalkan.');
+        session()->flash('success', 'Tagihan dibatalkan. Pembayaran yang sudah masuk kas telah dibalikkan.');
     }
 
     public function activeBilling(): void
     {
-         $this->billing->update(['status' => 'unpaid']);
+        $this->billing->update(['status' => 'unpaid']);
 
         ActivityLog::record([
             'user_id' => auth()->id(), 'action' => 'update', 'module' => 'billings',
@@ -276,6 +369,7 @@ class Show extends Component
                 ->orderByDesc('payment_date')
                 ->orderByDesc('id')
                 ->get(),
+            'cashAccounts' => CashAccount::active()->orderBy('name')->get(),
         ]);
     }
 }

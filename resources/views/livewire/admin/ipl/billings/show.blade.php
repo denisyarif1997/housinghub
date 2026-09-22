@@ -133,6 +133,18 @@
                 </div>
 
                 <div class="md:col-span-2">
+                    <x-ui.field label="Masuk ke Kas" :error="$errors->first('payment_cash_account_id')">
+                        <select wire:model="payment_cash_account_id" class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-[15px]">
+                            <option value="">— Tanpa pencatatan kas —</option>
+                            @foreach ($cashAccounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->name }} (Saldo @rupiah($account->currentBalance()))</option>
+                            @endforeach
+                        </select>
+                    </x-ui.field>
+                    <p class="mt-1 text-[13px] text-[#64748B]">Dana akan otomatis tercatat sebagai kas masuk di kas yang dipilih.</p>
+                </div>
+
+                <div class="md:col-span-2">
                     <button type="submit" wire:loading.attr="disabled"
                         class="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] px-4 font-semibold text-white disabled:opacity-60">
                         <i data-lucide="wallet" class="h-5 w-5"></i>
@@ -187,7 +199,7 @@
                         </div>
                     @elseif ($payment->status === 'pending')
                         <div class="mt-3 grid grid-cols-3 gap-2">
-                            <button wire:click="verifyPayment({{ $payment->id }})" wire:confirm="Verifikasi pembayaran ini?" class="flex min-h-[44px] items-center justify-center gap-1 rounded-xl border border-emerald-200 text-[14px] font-semibold text-emerald-700"><i data-lucide="check" class="h-4 w-4"></i> Verifikasi</button>
+                            <button wire:click="startVerify({{ $payment->id }})" class="flex min-h-[44px] items-center justify-center gap-1 rounded-xl border border-emerald-200 text-[14px] font-semibold text-emerald-700"><i data-lucide="check" class="h-4 w-4"></i> Verifikasi</button>
                             <button wire:click="startReject({{ $payment->id }})" class="flex min-h-[44px] items-center justify-center gap-1 rounded-xl border border-amber-200 text-[14px] font-semibold text-amber-700"><i data-lucide="x" class="h-4 w-4"></i> Tolak</button>
                             <button wire:click="deletePayment({{ $payment->id }})" wire:confirm="Hapus pembayaran ini?" class="flex min-h-[44px] items-center justify-center gap-1 rounded-xl border border-red-200 text-[14px] font-semibold text-red-700"><i data-lucide="trash-2" class="h-4 w-4"></i> Hapus</button>
                         </div>
@@ -199,3 +211,37 @@
         </div>
     </div>
 </div>
+{{-- Popup verifikasi: pilih kas tujuan pemasukan --}}
+@if ($verifyingId)
+    <div class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+        <div class="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="font-bold">Verifikasi Pembayaran</p>
+                    <p class="text-[13px] text-[#64748B]">Dana akan otomatis dicatat sebagai kas masuk ke kas yang dipilih.</p>
+                </div>
+                <button wire:click="cancelVerify" class="flex h-9 w-9 items-center justify-center rounded-xl border"><i data-lucide="x" class="h-4 w-4"></i></button>
+            </div>
+
+            <form wire:submit="confirmVerify" class="mt-3 space-y-3">
+                <x-ui.field label="Masuk ke Kas" :error="$errors->first('cash_account_id')">
+                    <select wire:model="cash_account_id" class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-[15px]">
+                        <option value="">— Tanpa pencatatan kas —</option>
+                        @foreach ($cashAccounts as $account)
+                            <option value="{{ $account->id }}">{{ $account->name }} (Saldo @rupiah($account->currentBalance()))</option>
+                        @endforeach
+                    </select>
+                </x-ui.field>
+
+                @if ($cashAccounts->isEmpty())
+                    <p class="rounded-xl bg-amber-50 p-3 text-[13px] text-amber-700">Belum ada kas terdaftar. Verifikasi tetap bisa dilanjutkan tanpa pencatatan kas.</p>
+                @endif
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" wire:click="cancelVerify" class="min-h-[44px] rounded-xl border border-[#E2E8F0] bg-white font-semibold">Batal</button>
+                    <button type="submit" wire:loading.attr="disabled" class="min-h-[44px] rounded-xl bg-emerald-600 font-semibold text-white disabled:opacity-60">Verifikasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif

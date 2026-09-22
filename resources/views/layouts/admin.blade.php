@@ -58,6 +58,10 @@
                         ['admin.water.readings', 'droplets', 'Catat Meter', 'admin.water.readings', ['manage-billing']],
                         ['admin.water.rates.index', 'tags', 'Tarif Air', 'admin.water.rates.*', ['manage-billing']],
                     ]],
+                    ['label' => 'Keuangan — Kas Warga', 'items' => [
+                        ['admin.cash.accounts.index', 'wallet', 'Daftar Kas', 'admin.cash.accounts.*', ['manage-finance']],
+                        ['admin.cash.transactions.index', 'arrow-left-right', 'Transaksi Kas', 'admin.cash.transactions.*', ['manage-finance']],
+                    ]],
                     ['label' => 'Info & Layanan', 'items' => [
                         ['admin.info.announcements', 'megaphone', 'Pengumuman', 'admin.info.announcements', ['manage-announcement']],
                         ['admin.info.complaints', 'message-square-warning', 'Laporan Warga', 'admin.info.complaints*', ['manage-complaint']],

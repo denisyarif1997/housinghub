@@ -13,7 +13,7 @@
     {{-- Kartu IPL --}}
     <div class="rounded-2xl border border-[#E2E8F0] bg-white p-4">
         <div class="flex items-center justify-between gap-2">
-            <p class="text-[14px] font-bold">Tagihan</p>
+            <p class="text-[14px] font-bold">Iuran</p>
             <a href="{{ route('resident.ipl.index') }}" wire:navigate
                 class="inline-flex shrink-0 items-center gap-1 text-[13px] font-semibold text-[#64748B] underline">
                 Lihat semua <i data-lucide="chevron-right" class="h-4 w-4"></i>
@@ -23,7 +23,7 @@
         @if (($overdueBillings ?? collect())->isNotEmpty())
             <div class="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
                 <p class="text-[13px] font-bold text-red-700">
-                    {{ $overdueBillings->count() }} tagihan lewat jatuh tempo
+                    {{ $overdueBillings->count() }} Iuran lewat jatuh tempo
                 </p>
                 <p class="mt-0.5 text-[13px] text-red-600">
                     Total tunggakan <span class="font-bold">@rupiah($overdueBillings->sum(fn ($b) => $b->remaining()))</span>
@@ -51,7 +51,7 @@
             </div>
         @endif
 
-        <p class="mt-3 text-[13px] font-semibold text-[#64748B]">Tagihan bulan ini ({{ \App\Support\Currency::period(now()->year, now()->month) }})</p>
+        <p class="mt-3 text-[13px] font-semibold text-[#64748B]">Iuran bulan ini ({{ \App\Support\Currency::period(now()->year, now()->month) }})</p>
         <div class="mt-2 space-y-2">
             @forelse (($currentBillings ?? collect()) as $billing)
                 <a href="{{ route('resident.ipl.show', $billing) }}" wire:navigate
@@ -72,18 +72,18 @@
                 </a>
             @empty
                 <div class="rounded-xl bg-slate-50 p-3 text-[13px] text-[#64748B]">
-                    Belum ada tagihan untuk bulan ini.
+                    Belum ada Iuran untuk bulan ini.
                 </div>
             @endforelse
         </div>
 
         @if ($outstandingCount > 0)
             <div class="mt-3 rounded-xl bg-red-50 p-3 text-[13px] text-red-700">
-                <span class="font-semibold">{{ $outstandingCount }} tagihan belum lunas</span> dengan total @rupiah($outstandingAmount)
+                <span class="font-semibold">{{ $outstandingCount }} Iuran belum lunas</span> dengan total @rupiah($outstandingAmount)
             </div>
         @else
             <div class="mt-3 rounded-xl bg-emerald-50 p-3 text-[13px] font-semibold text-emerald-700">
-                Semua tagihan IPL sudah lunas. Terima kasih! 🎉
+                Semua Iuran IPL sudah lunas. Terima kasih! 🎉
             </div>
         @endif
     </div>
@@ -102,7 +102,7 @@
     <div>
         <h2 class="mb-3 text-[16px] font-bold">Akses Cepat</h2>
         <div class="grid grid-cols-3 gap-3 text-center text-[13px] font-medium">
-            @foreach ([['wallet', 'Tagihan', 'resident.ipl.index'], ['messages-square', 'Forum', 'resident.forum.index'], ['wrench', 'Aduan', 'resident.complaints.index'], ['crown', 'Catur', 'resident.chess.index'], ['megaphone', 'Info', 'resident.info.index'], ['user', 'Profil', 'resident.profile']] as [$icon, $label, $route])
+            @foreach ([['wallet', 'Iuran', 'resident.ipl.index'], ['messages-square', 'Forum', 'resident.forum.index'], ['wrench', 'Aduan', 'resident.complaints.index'], ['crown', 'Catur', 'resident.chess.index'], ['megaphone', 'Info', 'resident.info.index'], ['user', 'Profil', 'resident.profile']] as [$icon, $label, $route])
                 @if ($route)
                     <a href="{{ route($route) }}" wire:navigate class="flex min-h-[84px] flex-col items-center justify-center gap-2 rounded-2xl border border-[#E2E8F0] bg-white p-3">
                         <i data-lucide="{{ $icon }}" class="h-5 w-5"></i>{{ $label }}
