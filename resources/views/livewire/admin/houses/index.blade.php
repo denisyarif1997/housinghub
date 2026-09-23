@@ -10,7 +10,7 @@
                 <i data-lucide="download" class="h-4 w-4"></i><span class="hidden sm:inline">Export</span>
             </button>
             <a href="{{ route('admin.houses.create') }}" wire:navigate
-                class="flex min-h-[48px] min-w-[48px] items-center justify-center gap-2 rounded-2xl bg-[#0F172A] px-4 font-semibold text-white">
+                class="flex min-h-[48px] min-w-[48px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-4 font-semibold text-white">
                 <i data-lucide="plus" class="h-5 w-5"></i><span class="hidden sm:inline">Tambah</span>
             </a>
         </div>

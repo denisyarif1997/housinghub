@@ -26,6 +26,7 @@ class Index extends Component
         'security' => 'Keamanan',
         'finance' => 'Keuangan',
         'system' => 'Sistem',
+        'menu' => 'Akses Menu (per halaman)',
     ];
 
     public string $search = '';
@@ -213,6 +214,22 @@ class Index extends Component
         }
     }
 
+    /**
+     * Centang/hapus semua permission menu sekaligus.
+     */
+    public function toggleAllMenuPermissions(bool $select): void
+    {
+        $menuIds = Permission::where('group', 'menu')->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        if ($select) {
+            $this->managePermissions = array_values(array_unique(array_merge($this->managePermissions, $menuIds)));
+
+            return;
+        }
+
+        $this->managePermissions = array_values(array_diff($this->managePermissions, $menuIds));
+    }
+
     public function saveManage(): void
     {
         $role = Role::findOrFail($this->managingId ?? 0);
@@ -227,7 +244,38 @@ class Index extends Component
         $validIds = Permission::pluck('id')->map(fn ($id) => (int) $id)->all();
         $selected = array_values(array_intersect($this->managePermissions, $validIds));
 
-        $role->permissions()->sync($selected);
+        // Auto-sync: pastikan permission aksi yang diperlukan menu terpilih
+        // ikut diberikan, agar aksi di dalam halaman tidak ditolak 403.
+        $menuPerms = Permission::where('group', 'menu')->pluck('id', 'slug')
+            ->map(fn ($id) => (int) $id);
+        $actionIds = [];
+        foreach (\App\Support\AdminMenu::sections() as $section) {
+            foreach ($section['items'] as $item) {
+                [$route, $icon, $label, $pattern, $menuSlugs, $actionSlugs] = $item;
+                foreach ($menuSlugs as $menuSlug) {
+                    $menuId = $menuPerms[$menuSlug] ?? null;
+                    if ($menuId !== null && in_array($menuId, $selected, true)) {
+                        foreach ($actionSlugs as $slug) {
+                            $actionId = Permission::where('slug', $slug)->value('id');
+                            if ($actionId) {
+                                $actionIds[] = (int) $actionId;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Akses Area Admin wajib bila ada menu admin yang dicentang.
+        if ($selected !== []) {
+            $accessAdminId = Permission::where('slug', 'access-admin')->value('id');
+            if ($accessAdminId) {
+                $actionIds[] = (int) $accessAdminId;
+            }
+        }
+
+        $syncIds = array_values(array_unique(array_merge($selected, $actionIds)));
+
+        $role->permissions()->sync($syncIds);
 
         ActivityLog::record([
             'user_id' => auth()->id(),
@@ -236,7 +284,7 @@ class Index extends Component
             'subject_type' => Role::class,
             'subject_id' => $role->id,
             'description' => 'Memperbarui permission role '.$role->name,
-            'new_values' => ['permission_ids' => $selected],
+            'new_values' => ['permission_ids' => $syncIds],
         ]);
 
         $this->closeManage();
@@ -248,7 +296,11 @@ class Index extends Component
      */
     protected function groupedPermissions(): Collection
     {
-        return Permission::orderBy('group')->orderBy('name')->get();
+        // Grup "menu" ditaruh paling bawah agar daftar aksi tetap di atas.
+        return Permission::orderBy('group')->orderBy('name')
+            ->get()
+            ->sortBy(fn (Permission $p) => $p->group === 'menu' ? 1 : 0)
+            ->values();
     }
 
     #[Layout('layouts.admin', ['title' => 'Role & Permission'])]

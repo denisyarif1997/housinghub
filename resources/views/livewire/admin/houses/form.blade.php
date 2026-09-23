@@ -47,7 +47,7 @@
             </select>
         </x-ui.field>
 
-        <button class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-[#0F172A] font-semibold text-white" wire:loading.attr="disabled">
+        <button class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 font-semibold text-white" wire:loading.attr="disabled">
             <span wire:loading.remove>Simpan</span><span wire:loading>Menyimpan...</span>
         </button>
     </form>

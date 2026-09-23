@@ -82,10 +82,10 @@
         <form wire:submit="addResponse" class="mt-4 space-y-2">
             <x-ui.field label="Tambah Tanggapan" :error="$errors->first('message')">
                 <textarea wire:model="message" rows="3" placeholder="Tulis pesan tambahan..."
-                    class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-[#0F172A]"></textarea>
+                    class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-teal-600"></textarea>
             </x-ui.field>
             <button type="submit" wire:loading.attr="disabled"
-                class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
+                class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-teal-700 font-semibold text-white disabled:opacity-60">
                 <i data-lucide="send" class="h-4 w-4"></i> Kirim
             </button>
         </form>

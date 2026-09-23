@@ -30,6 +30,7 @@ class Readings extends Component
     public string $water_rate_id = '';
     public string $houseSearch = '';
     public array $meters = [];
+    public array $starts = [];
     public array $photos = [];
     public ?array $result = null;
 
@@ -52,12 +53,14 @@ class Readings extends Component
     {
         // Reset agar input terisi ulang dari draft periode terpilih.
         $this->meters = [];
+        $this->starts = [];
         $this->photos = [];
     }
 
     public function updatedPeriodYear(): void
     {
         $this->meters = [];
+        $this->starts = [];
         $this->photos = [];
     }
 
@@ -93,6 +96,22 @@ class Readings extends Component
         return $rows;
     }
 
+    /**
+     * Override meter awal yang diisi manual [house_id => angka].
+     */
+    protected function startRows(): array
+    {
+        $rows = [];
+        foreach ($this->starts as $hid => $val) {
+            if ($val === null || $val === '') {
+                continue;
+            }
+            $rows[(int) $hid] = (float) $val;
+        }
+
+        return $rows;
+    }
+
     protected function validateForm(): void
     {
         $this->validate([
@@ -103,6 +122,8 @@ class Readings extends Component
             'water_rate_id' => ['nullable', 'exists:water_rates,id'],
             'meters' => ['nullable', 'array'],
             'meters.*' => ['nullable', 'numeric', 'min:0'],
+            'starts' => ['nullable', 'array'],
+            'starts.*' => ['nullable', 'numeric', 'min:0'],
             'photos' => ['nullable', 'array'],
             'photos.*' => ['nullable', 'image', 'max:12288'],
         ], [
@@ -192,7 +213,7 @@ class Readings extends Component
             return;
         }
 
-        $res = $svc->saveReadings($year, $month, $eid, auth()->id(), $rid, $rows, $photos);
+        $res = $svc->saveReadings($year, $month, $eid, auth()->id(), $rid, $rows, $photos, $this->startRows());
         $this->clearFilled();
         $this->result = null;
 
@@ -251,7 +272,7 @@ class Readings extends Component
         }
 
         $savedOut = $rows !== []
-            ? $svc->saveReadings($year, $month, $eid, auth()->id(), $rid, $rows, $photos)
+            ? $svc->saveReadings($year, $month, $eid, auth()->id(), $rid, $rows, $photos, $this->startRows())
             : ['saved' => 0, 'skipped' => 0, 'no_rate' => 0, 'invalid' => 0];
         $gen = $svc->generateFromDrafts($year, $month, $eid, $due, auth()->id(), $rid);
 

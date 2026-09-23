@@ -75,7 +75,7 @@
                 </x-ui.field>
             </div>
             <div class="md:col-span-2">
-                <button type="submit" class="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-[#0F172A] font-semibold text-white">
+                <button type="submit" class="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 font-semibold text-white">
                     {{ $editingId ? 'Simpan Perubahan' : 'Simpan Tarif Air' }}
                 </button>
             </div>

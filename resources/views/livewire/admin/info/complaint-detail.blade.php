@@ -75,7 +75,7 @@
 
             <div class="md:col-span-2">
                 <button type="submit" wire:loading.attr="disabled"
-                    class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] px-4 font-semibold text-white disabled:opacity-60 md:w-auto">
+                    class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-4 font-semibold text-white disabled:opacity-60 md:w-auto">
                     Simpan Perubahan
                 </button>
             </div>
@@ -101,7 +101,7 @@
             </label>
 
             <button type="submit" wire:loading.attr="disabled"
-                class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] px-4 font-semibold text-white disabled:opacity-60 md:w-auto">
+                class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-4 font-semibold text-white disabled:opacity-60 md:w-auto">
                 <i data-lucide="send" class="h-4 w-4"></i> Kirim Tanggapan
             </button>
         </form>

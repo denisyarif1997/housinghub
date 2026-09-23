@@ -87,7 +87,7 @@
             </x-ui.field>
 
             <div class="md:col-span-2">
-                <button type="submit" class="min-h-[48px] w-full rounded-2xl bg-[#0F172A] px-4 font-semibold text-white md:w-auto md:px-8">Simpan</button>
+                <button type="submit" class="min-h-[48px] w-full rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-4 font-semibold text-white md:w-auto md:px-8">Simpan</button>
             </div>
         </form>
     </div>

@@ -2,7 +2,7 @@
     $isCancelled = $billing->status === 'cancelled';
     $canPay = $remaining > 0 && ! $isCancelled && ! $hasPendingPayment;
 
-    $inputClass = 'min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]';
+    $inputClass = 'min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-teal-600';
     $cardClass = 'rounded-2xl border border-[#E2E8F0] bg-white p-4';
 
     $flashes = [
@@ -34,7 +34,7 @@
         <i data-lucide="arrow-left" class="h-4 w-4"></i> Kembali ke daftar tagihan
     </a>
 
-    <div class="rounded-2xl bg-[#0F172A] p-4 text-white">
+    <div class="rounded-2xl bg-teal-700 p-4 text-white">
         <div class="flex items-start justify-between gap-3">
             <div class="text-[13px] text-white/70">
                 <p>Tagihan {{ $billing->typeLabel() }} {{ $periodLabel }}</p>
@@ -108,7 +108,7 @@
             </div>
 
             <button type="submit" wire:loading.attr="disabled"
-                class="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
+                class="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-teal-700 font-semibold text-white disabled:opacity-60">
                 <i data-lucide="send" class="h-5 w-5"></i>
                 <span wire:loading.remove wire:target="submitPayment">Kirim Konfirmasi</span>
                 <span wire:loading wire:target="submitPayment">Mengirim...</span>

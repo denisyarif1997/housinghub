@@ -66,6 +66,60 @@ class RolePermissionSeeder extends Seeder
             }
         }
 
+        // Permission per menu (RBAC per menu): tiap item sidebar punya
+        // permission sendiri sehingga bisa diberikan per menu di halaman Role.
+        $menuMap = [
+            'menu-dashboard' => ['view-dashboard'],
+            'menu-estates' => ['manage-houses'],
+            'menu-blocks' => ['manage-houses'],
+            'menu-houses' => ['manage-houses'],
+            'menu-residents' => ['manage-residents'],
+            'menu-ipl-billings' => ['manage-billing', 'verify-payment'],
+            'menu-ipl-generate' => ['manage-billing'],
+            'menu-ipl-payments' => ['manage-payment', 'verify-payment'],
+            'menu-ipl-rates' => ['manage-billing'],
+            'menu-water-readings' => ['manage-billing'],
+            'menu-water-rates' => ['manage-billing'],
+            'menu-cash-accounts' => ['manage-finance'],
+            'menu-cash-transactions' => ['manage-finance'],
+            'menu-announcements' => ['manage-announcement'],
+            'menu-complaints' => ['manage-complaint'],
+            'menu-forum' => ['manage-forum'],
+            'menu-users' => ['manage-user'],
+            'menu-roles' => ['manage-role'],
+            'menu-activity-logs' => ['view-activity-log'],
+        ];
+
+        $menuLabels = [
+            'menu-dashboard' => 'Menu: Dashboard',
+            'menu-estates' => 'Menu: Perumahan',
+            'menu-blocks' => 'Menu: Blok',
+            'menu-houses' => 'Menu: Rumah',
+            'menu-residents' => 'Menu: Warga',
+            'menu-ipl-billings' => 'Menu: Tagihan IPL',
+            'menu-ipl-generate' => 'Menu: Generate Tagihan',
+            'menu-ipl-payments' => 'Menu: Pembayaran',
+            'menu-ipl-rates' => 'Menu: Tarif IPL',
+            'menu-water-readings' => 'Menu: Catat Meter Air',
+            'menu-water-rates' => 'Menu: Tarif Air',
+            'menu-cash-accounts' => 'Menu: Daftar Kas',
+            'menu-cash-transactions' => 'Menu: Transaksi Kas',
+            'menu-announcements' => 'Menu: Pengumuman',
+            'menu-complaints' => 'Menu: Laporan Warga',
+            'menu-forum' => 'Menu: Forum',
+            'menu-users' => 'Menu: User',
+            'menu-roles' => 'Menu: Role & Akses',
+            'menu-activity-logs' => 'Menu: Log Aktivitas',
+        ];
+
+        foreach ($menuMap as $slug => $actionSlugs) {
+            $perm = Permission::firstOrCreate(['slug' => $slug], [
+                'name' => $menuLabels[$slug] ?? $slug,
+                'group' => 'menu',
+            ]);
+            $permIds[$slug] = $perm->id;
+        }
+
         $map = [
             'super_admin' => array_keys($permIds),
             'admin' => array_keys($permIds),
@@ -76,6 +130,16 @@ class RolePermissionSeeder extends Seeder
             'maintenance' => ['view-dashboard', 'access-admin', 'manage-complaint', 'manage-facility', 'manage-booking'],
             'resident' => ['view-dashboard'],
         ];
+
+        // Turunkan permission menu otomatis: role mendapat menu-... bila
+        // memiliki minimal satu permission aksi yang membuka menu tsb.
+        foreach ($map as $slug => $slugs) {
+            foreach ($menuMap as $menuSlug => $actionSlugs) {
+                if ($slug === 'super_admin' || $slug === 'admin' || array_intersect($actionSlugs, $slugs) !== []) {
+                    $map[$slug][] = $menuSlug;
+                }
+            }
+        }
 
         foreach ($map as $slug => $slugs) {
             $role = Role::where('slug', $slug)->first();

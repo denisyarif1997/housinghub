@@ -104,7 +104,7 @@
                         </span>
                     @endif
                     @if ($isTarget && ! $piece)
-                        <span class="absolute h-4 w-4 rounded-full bg-[#0F172A]/30"></span>
+                        <span class="absolute h-4 w-4 rounded-full bg-teal-700/30"></span>
                     @endif
                 </button>
             @endforeach
@@ -137,12 +137,12 @@
             </button>
             @if ($replayAt !== null)
                 <button type="button" wire:click="replayLive" wire:loading.attr="disabled"
-                    class="inline-flex items-center gap-1 rounded-xl bg-[#0F172A] px-3 py-2 text-[12px] font-semibold text-white">
+                    class="inline-flex items-center gap-1 rounded-xl bg-teal-700 px-3 py-2 text-[12px] font-semibold text-white">
                     <i data-lucide="play" class="h-4 w-4"></i> Kembali Live
                 </button>
             @else
                 <button type="button" wire:click="replayStart" wire:loading.attr="disabled"
-                    class="inline-flex items-center gap-1 rounded-xl bg-[#0F172A] px-3 py-2 text-[12px] font-semibold text-white">
+                    class="inline-flex items-center gap-1 rounded-xl bg-teal-700 px-3 py-2 text-[12px] font-semibold text-white">
                     <i data-lucide="play" class="h-4 w-4"></i> Putar Histori
                 </button>
             @endif
@@ -156,7 +156,7 @@
                         @forelse ($moves as $i => $move)
                 @php
                     $num = $i + 1;
-                    $dot = $move['color'] === 'w' ? 'bg-[#0F172A]' : 'bg-[#B58863]';
+                    $dot = $move['color'] === 'w' ? 'bg-teal-700' : 'bg-[#B58863]';
                     $txt = $move['color'] === 'w' ? 'text-[#0F172A]' : 'text-[#B58863]';
                     $active = $replayAt !== null ? ($replayAt === $num) : ($num === count($moves));
                 @endphp

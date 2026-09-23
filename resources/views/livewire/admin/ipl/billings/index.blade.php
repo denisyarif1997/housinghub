@@ -193,7 +193,7 @@
 
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" wire:click="cancelMarkPaid" class="min-h-[44px] rounded-xl border border-[#E2E8F0] bg-white font-semibold">Batal</button>
-                        <button type="submit" wire:loading.attr="disabled" class="min-h-[44px] rounded-xl bg-emerald-600 font-semibold text-white disabled:opacity-60">Tandai Lunas</button>
+                        <button type="submit" wire:loading.attr="disabled" class="min-h-[44px] rounded-xl border border-[#E2E8F0] bg-white font-semibold">Tandai Lunas</button>
                     </div>
                 </form>
             </div>

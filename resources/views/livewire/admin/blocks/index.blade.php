@@ -30,7 +30,7 @@
                 <input wire:model.live="name" placeholder="Blok A" class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] px-4">
             </x-ui.field>
         </div>
-        <button class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-[#0F172A] font-semibold text-white sm:w-auto sm:px-8">
+        <button class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 font-semibold text-white sm:w-auto sm:px-8">
             <span wire:loading.remove>Simpan</span><span wire:loading>Menyimpan...</span>
         </button>
     </form>

@@ -265,10 +265,9 @@ class RbacTest extends TestCase
         Livewire::actingAs($this->admin())
             ->test(RoleIndex::class)
             ->call('openManage', $role->id)
-            ->assertSee('Kelola Role')
+            ->assertSee('Kelola Akses')
             ->assertSee('Akses Area Admin')
-            ->assertSee('Umum')
-            ->assertSee('Keuangan & IPL');
+            ->assertSee('Akses Per Halaman');
     }
 
     public function test_role_without_access_admin_cannot_enter_admin_area(): void

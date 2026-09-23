@@ -146,7 +146,7 @@
 
                 <div class="md:col-span-2">
                     <button type="submit" wire:loading.attr="disabled"
-                        class="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] px-4 font-semibold text-white disabled:opacity-60">
+                        class="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-4 font-semibold text-white disabled:opacity-60">
                         <i data-lucide="wallet" class="h-5 w-5"></i>
                         <span wire:loading.remove wire:target="recordPayment">Simpan Pembayaran</span>
                         <span wire:loading wire:target="recordPayment">Menyimpan...</span>

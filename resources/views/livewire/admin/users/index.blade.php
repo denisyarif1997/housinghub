@@ -6,7 +6,7 @@
                 class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] bg-white pl-11 pr-4 outline-none focus:border-[#0F172A]">
         </div>
         <button type="button" wire:click="openCreate"
-            class="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#0F172A] px-4 font-semibold text-white">
+            class="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-4 font-semibold text-white">
             <i data-lucide="plus" class="h-5 w-5"></i><span class="hidden sm:inline">Tambah</span>
         </button>
     </div>
@@ -106,7 +106,7 @@
                     @endif
                     <div class="grid grid-cols-2 gap-2 pb-safe">
                         <button type="button" wire:click="closeForm" class="flex min-h-[48px] items-center justify-center rounded-xl border border-[#E2E8F0] bg-white font-semibold">Batal</button>
-                        <button type="submit" wire:loading.attr="disabled" class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
+                        <button type="submit" wire:loading.attr="disabled" class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 font-semibold text-white disabled:opacity-60">
                             <span wire:loading.remove wire:target="save">Simpan</span>
                             <span wire:loading wire:target="save">Menyimpan...</span>
                         </button>

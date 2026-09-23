@@ -152,7 +152,7 @@
                     type="submit"
                     wire:loading.attr="disabled"
                     wire:target="generate, photos.*"
-                    class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60"
+                    class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 font-semibold text-white disabled:opacity-60"
                 >
                     <i data-lucide="file-plus-2" class="h-4 w-4"></i>
                     Generate Tagihan Air
@@ -254,13 +254,27 @@
 
                     <div class="rounded-xl bg-slate-50 p-3 text-[13px]">
 
-                        <p class="text-[#64748B]">
+                        <label class="text-[#64748B]">
                             Meter Awal
-                        </p>
+                            <span class="text-[11px]">(bisa diubah)</span>
+                        </label>
 
-                        <p class="text-lg font-bold">
-                            {{ $h['last'] }} m³
-                        </p>
+                        <input
+                            wire:model="starts.{{ $h['id'] }}"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="{{ $h['last'] }}"
+                            class="mt-1 min-h-[40px] w-full rounded-lg border border-[#E2E8F0] bg-white px-2 text-[14px] font-bold"
+                        >
+
+                        @error('starts.'.$h['id'])
+
+                            <p class="mt-1 text-[12px] text-red-600">
+                                {{ $message }}
+                            </p>
+
+                        @enderror
 
                     </div>
 

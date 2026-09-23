@@ -9,7 +9,7 @@
     ];
 @endphp
 
-<div {{ $attributes->merge(['class' => 'flex items-start gap-3 rounded-2xl border p-4 text-[14px] ' . ($styles[$type] ?? $styles['info'])]) }}>
+<div {{ $attributes->merge(['class' => 'flex items-start gap-3 rounded-2xl border-0 p-4 text-[14px] shadow-sm ' . ($styles[$type] ?? $styles['info'])]) }}>
     @if ($icon)
         <i data-lucide="{{ $icon }}" class="mt-0.5 h-5 w-5 shrink-0"></i>
     @endif

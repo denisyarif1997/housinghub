@@ -20,7 +20,7 @@
                 class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] bg-white pl-11 pr-4 text-[15px] outline-none focus:border-[#0F172A]">
         </div>
         <button type="button" wire:click="create"
-            class="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#0F172A] px-4 font-semibold text-white">
+            class="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-4 font-semibold text-white">
             <i data-lucide="plus" class="h-5 w-5"></i><span class="hidden sm:inline">Tambah</span>
         </button>
     </div>
@@ -35,7 +35,7 @@
                 <input wire:model.live="name" placeholder="Nama perumahan" class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] px-4">
             </x-ui.field>
         </div>
-        <button type="submit" class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-[#0F172A] font-semibold text-white sm:w-auto sm:px-8">
+        <button type="submit" class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 font-semibold text-white sm:w-auto sm:px-8">
             <span wire:loading.remove>Simpan</span><span wire:loading>Menyimpan...</span>
         </button>
     </form>
@@ -65,7 +65,7 @@
             <x-ui.field label="Email" :error="$errors->first('editEmail')">
                 <input wire:model.live="editEmail" type="email" class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] px-4">
             </x-ui.field>
-            <button type="submit" class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-[#0F172A] font-semibold text-white sm:w-auto sm:px-8">
+            <button type="submit" class="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 font-semibold text-white sm:w-auto sm:px-8">
                 <span wire:loading.remove>Simpan Perubahan</span><span wire:loading>Menyimpan...</span>
             </button>
         </form>

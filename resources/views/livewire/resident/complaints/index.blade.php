@@ -25,13 +25,13 @@
         </div>
     </div>
 
-    <button wire:click="openForm" class="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white">
+    <button wire:click="openForm" class="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-teal-700 font-semibold text-white">
         <i data-lucide="plus" class="h-5 w-5"></i> Buat Pengaduan
     </button>
 
     <div class="flex gap-2 overflow-x-auto pb-1">
         @foreach (['' => 'Semua', 'open' => 'Baru', 'in_progress' => 'Diproses', 'resolved' => 'Selesai', 'closed' => 'Ditutup'] as $key => $label)
-            <button wire:click="$set('statusFilter', '{{ $key }}')" class="whitespace-nowrap rounded-full px-4 py-2 text-[14px] font-semibold {{ $statusFilter === $key ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white' }}">{{ $label }}</button>
+            <button wire:click="$set('statusFilter', '{{ $key }}')" class="whitespace-nowrap rounded-full px-4 py-2 text-[14px] font-semibold {{ $statusFilter === $key ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white' }}">{{ $label }}</button>
         @endforeach
     </div>
 
@@ -53,7 +53,7 @@
             </a>
         @empty
             <x-ui.empty-state icon="message-square" title="Belum ada pengaduan" subtitle="Pengaduan yang Anda buat akan tampil di sini.">
-                <button wire:click="openForm" class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] px-6 font-semibold text-white">
+                <button wire:click="openForm" class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-6 font-semibold text-white">
                     <i data-lucide="plus" class="h-4 w-4"></i> Buat Pengaduan Pertama
                 </button>
             </x-ui.empty-state>
@@ -74,7 +74,7 @@
                 <form wire:submit="submit" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 pb-8">
                     <x-ui.field label="Judul" :error="$errors->first('title')">
                         <input wire:model="title" placeholder="Ringkasan masalah"
-                            class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]">
+                            class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-teal-600">
                     </x-ui.field>
                     <x-ui.field label="Kategori" :error="$errors->first('category')">
                         <select wire:model="category" class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-[15px]">
@@ -96,7 +96,7 @@
                     </x-ui.field>
                     <x-ui.field label="Deskripsi" :error="$errors->first('description')">
                         <textarea wire:model="description" rows="4" placeholder="Jelaskan masalahnya..."
-                            class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-[#0F172A]"></textarea>
+                            class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-teal-600"></textarea>
                     </x-ui.field>
                     <div class="grid grid-cols-2 gap-2 pb-safe">
                         <button type="button" wire:click="closeForm"
@@ -104,7 +104,7 @@
                             Batal
                         </button>
                         <button type="submit" wire:loading.attr="disabled"
-                            class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
+                            class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-teal-700 font-semibold text-white disabled:opacity-60">
                             <span wire:loading.remove wire:target="submit">Kirim</span>
                             <span wire:loading wire:target="submit">Mengirim...</span>
                         </button>

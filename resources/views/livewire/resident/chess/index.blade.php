@@ -27,7 +27,7 @@
                     Tolak
                 </button>
                 <button wire:click="accept({{ $invite->id }})" wire:loading.attr="disabled"
-                    class="flex min-h-[44px] items-center justify-center rounded-xl bg-[#0F172A] font-semibold text-white">
+                    class="flex min-h-[44px] items-center justify-center rounded-xl bg-teal-700 font-semibold text-white">
                     Terima
                 </button>
             </div>
@@ -76,7 +76,7 @@
             </div>
         @else
             <button wire:click="createOpenChallenge" wire:loading.attr="disabled"
-                class="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white">
+                class="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-teal-700 font-semibold text-white">
                 <i data-lucide="swords" class="h-5 w-5"></i> Buat Tantangan Terbuka
             </button>
         @endif
@@ -88,7 +88,7 @@
                     <p class="text-[12px] text-[#64748B]">Membuat tantangan terbuka</p>
                 </div>
                 <button wire:click="accept({{ $challenge->id }})" wire:loading.attr="disabled"
-                    class="flex min-h-[40px] items-center rounded-xl bg-[#0F172A] px-4 text-[13px] font-semibold text-white">
+                    class="flex min-h-[40px] items-center rounded-xl bg-teal-700 px-4 text-[13px] font-semibold text-white">
                     Terima
                 </button>
             </div>

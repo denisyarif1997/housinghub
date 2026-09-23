@@ -23,75 +23,21 @@
         })();
     </script>
 </head>
-<body class="bg-[#F8FAFC] text-[#0F172A]">
+<body class="bg-[#F6F8F7] text-[#1E293B]">
 <div x-data="{ sidebar: false }" class="min-h-dvh lg:flex lg:items-stretch">
-    <aside class="hidden w-64 shrink-0 flex-col border-r border-[#E2E8F0] bg-white lg:sticky lg:top-0 lg:flex lg:h-dvh">
+    <aside class="hidden w-64 shrink-0 flex-col border-r border-[#EEF2F1] bg-white lg:sticky lg:top-0 lg:flex lg:h-dvh">
         <div class="flex items-center gap-3 px-5 pb-5 pt-6">
-            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0F172A] text-white">
-                <i data-lucide="home" class="h-5 w-5"></i>
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 shadow-lg shadow-teal-600/30">
+                <i data-lucide="home" class="h-5 w-5 text-white"></i>
             </div>
-            <p class="font-bold">{{ config('app.name', 'HousingHub') }}</p>
+            <p class="font-bold text-[#134E4A]">{{ config('app.name', 'HousingHub') }}</p>
         </div>
         <nav class="flex-1 space-y-1 overflow-y-auto px-3 pb-6 text-[14px]">
             @php
-                $user = auth()->user();
                 $navLink = 'flex items-center gap-3 rounded-xl px-3 py-2.5 transition';
-                $navIdle = 'hover:bg-slate-100';
+                $navIdle = 'hover:bg-teal-50 hover:text-teal-800';
                 $navGroup = 'px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-[#64748B]';
-                $sections = [
-                    ['label' => null, 'items' => [
-                        ['admin.dashboard', 'layout-dashboard', 'Dashboard', 'admin.dashboard', ['view-dashboard']],
-                    ]],
-                    ['label' => 'Data Master', 'items' => [
-                        ['admin.estates.index', 'building-2', 'Perumahan', 'admin.estates.*', ['manage-houses']],
-                        ['admin.blocks.index', 'grid-2x2', 'Blok', 'admin.blocks.*', ['manage-houses']],
-                        ['admin.houses.index', 'house', 'Rumah', 'admin.houses.*', ['manage-houses']],
-                        ['admin.residents.index', 'users', 'Warga', 'admin.residents.*', ['manage-residents']],
-                    ]],
-                    ['label' => 'Keuangan — IPL', 'items' => [
-                        ['admin.ipl.billings.index', 'file-text', 'Tagihan IPL', 'admin.ipl.billings.*', ['manage-billing', 'verify-payment']],
-                        ['admin.ipl.generate', 'calendar-plus', 'Generate Tagihan', 'admin.ipl.generate', ['manage-billing']],
-                        ['admin.ipl.payments.index', 'receipt', 'Pembayaran', 'admin.ipl.payments.*', ['manage-payment', 'verify-payment']],
-                        ['admin.ipl.rates.index', 'tags', 'Tarif IPL', 'admin.ipl.rates.*', ['manage-billing']],
-                    ]],
-                    ['label' => 'Keuangan — Air', 'items' => [
-                        ['admin.water.readings', 'droplets', 'Catat Meter', 'admin.water.readings', ['manage-billing']],
-                        ['admin.water.rates.index', 'tags', 'Tarif Air', 'admin.water.rates.*', ['manage-billing']],
-                    ]],
-                    ['label' => 'Keuangan — Kas Warga', 'items' => [
-                        ['admin.cash.accounts.index', 'wallet', 'Daftar Kas', 'admin.cash.accounts.*', ['manage-finance']],
-                        ['admin.cash.transactions.index', 'arrow-left-right', 'Transaksi Kas', 'admin.cash.transactions.*', ['manage-finance']],
-                    ]],
-                    ['label' => 'Info & Layanan', 'items' => [
-                        ['admin.info.announcements', 'megaphone', 'Pengumuman', 'admin.info.announcements', ['manage-announcement']],
-                        ['admin.info.complaints', 'message-square-warning', 'Laporan Warga', 'admin.info.complaints*', ['manage-complaint']],
-                        ['admin.forum.index', 'messages-square', 'Forum Warga', 'admin.forum.*', ['manage-forum']],
-                    ]],
-                    ['label' => 'Sistem', 'items' => [
-                        ['admin.users.index', 'user-cog', 'User', 'admin.users.*', ['manage-user']],
-                        ['admin.roles.index', 'shield-check', 'Role & Akses', 'admin.roles.*', ['manage-role']],
-                        ['admin.activity-logs.index', 'history', 'Log Aktivitas', 'admin.activity-logs.*', ['view-activity-log']],
-                    ]],
-                ];
-
-                $sections = collect($sections)
-                    ->map(function (array $section) use ($user) {
-                        $visibleItems = [];
-
-                        foreach ($section['items'] as $item) {
-                            [$route, $icon, $label, $pattern, $permissions] = $item;
-                            if ($user && $user->hasPermission(...($permissions ?? []))) {
-                                $visibleItems[] = [$route, $icon, $label, $pattern];
-                            }
-                        }
-
-                        $section['items'] = $visibleItems;
-
-                        return $section;
-                    })
-                    ->filter(fn (array $section) => ! empty($section['items']))
-                    ->values()
-                    ->all();
+                $sections = \App\Support\AdminMenu::forUser(auth()->user());
             @endphp
 
             @foreach ($sections as $section)
@@ -100,7 +46,7 @@
                 @endif
                 @foreach ($section['items'] as [$route, $icon, $label, $pattern])
                     <a href="{{ route($route) }}" wire:navigate
-                        class="{{ $navLink }} {{ request()->routeIs($pattern) ? 'bg-[#0F172A] font-semibold text-white' : $navIdle }}">
+                        class="{{ $navLink }} {{ request()->routeIs($pattern) ? 'bg-teal-700 font-semibold text-white shadow-lg shadow-teal-700/30' : $navIdle }}">
                         <i data-lucide="{{ $icon }}" class="h-4 w-4"></i> {{ $label }}
                     </a>
                 @endforeach
@@ -115,10 +61,10 @@
             class="absolute inset-y-0 left-0 flex w-72 flex-col bg-white">
             <div class="flex items-center justify-between px-5 pb-4 pt-6">
                 <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0F172A] text-white">
-                        <i data-lucide="home" class="h-5 w-5"></i>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 shadow-lg shadow-teal-600/30">
+                        <i data-lucide="home" class="h-5 w-5 text-white"></i>
                     </div>
-                    <p class="font-bold">{{ config('app.name', 'HousingHub') }}</p>
+                    <p class="font-bold text-[#134E4A]">{{ config('app.name', 'HousingHub') }}</p>
                 </div>
                 <button @click="sidebar=false" class="flex h-11 w-11 items-center justify-center rounded-xl border">
                     <i data-lucide="x" class="h-5 w-5"></i>
@@ -131,7 +77,7 @@
                     @endif
                     @foreach ($section['items'] as [$route, $icon, $label, $pattern])
                         <a href="{{ route($route) }}" wire:navigate @click="sidebar=false"
-                            class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs($pattern) ? 'bg-[#0F172A] font-semibold text-white' : $navIdle }}">
+                            class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs($pattern) ? 'bg-teal-700 font-semibold text-white shadow-lg shadow-teal-700/30' : $navIdle }}">
                             <i data-lucide="{{ $icon }}" class="h-4 w-4"></i> {{ $label }}
                         </a>
                     @endforeach
@@ -140,7 +86,7 @@
         </aside>
     </div>
     <div class="flex min-w-0 flex-1 flex-col">
-        <header class="sticky top-0 z-30 border-b border-[#E2E8F0] bg-white">
+        <header class="sticky top-0 z-30 border-b border-[#EEF2F1] bg-[#F6F8F7]/85 backdrop-blur-xl">
             <div class="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 lg:px-8">
                 <button @click="sidebar=true" class="flex h-11 w-11 items-center justify-center rounded-xl border lg:hidden"><i data-lucide="menu" class="h-5 w-5"></i></button>
                 <h1 class="flex-1 truncate text-lg font-bold">{{ $title }}</h1>

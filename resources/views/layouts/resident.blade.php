@@ -36,31 +36,27 @@
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
-<body class="bg-[#F8FAFC] text-[#0F172A] antialiased">
+<body class="bg-[#F6F8F7] text-[#1E293B] antialiased">
 <div class="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-    <header class="sticky top-0 z-30 border-b border-[#E2E8F0] bg-white/80 pt-safe backdrop-blur">
-        <div class="flex h-16 items-center justify-between px-4">
+    <header class="sticky top-0 z-30 border-b border-white/60 bg-[#F6F8F7]/80 pt-safe backdrop-blur-xl">
+        <div class="flex h-16 items-center justify-between px-5">
             <a href="{{ route('resident.dashboard') }}" class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F172A] text-white">
-                    <i data-lucide="home" class="h-5 w-5"></i>
+                <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 shadow-lg shadow-teal-600/30">
+                    <i data-lucide="home" class="h-5 w-5 text-white"></i>
                 </div>
-                <p class="font-bold tracking-tight">{{ config('app.name', 'HousingHub') }}</p>
+                <p class="font-bold tracking-tight text-[#134E4A]">{{ config('app.name', 'HousingHub') }}</p>
             </a>
             <div class="flex items-center gap-2">
                 <button type="button" data-theme-toggle
-                    class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] text-[#0F172A] transition hover:bg-slate-100 active:scale-95"
+                    class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#134E4A] shadow-sm transition active:scale-95"
                     aria-label="Ganti tema">
                     <i data-lucide="moon" class="h-5 w-5 hidden dark:block"></i>
                     <i data-lucide="sun" class="h-5 w-5 block dark:hidden"></i>
                 </button>
-                <button type="button" disabled title="Notifikasi belum tersedia"
-                    class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] text-[#94A3B8] opacity-50">
-                    <i data-lucide="bell" class="h-5 w-5"></i>
-                </button>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" title="Keluar"
-                        class="flex h-11 w-11 items-center justify-center rounded-xl border border-red-100 bg-red-50 text-red-700 transition hover:bg-red-100 active:scale-95">
+                        class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-600 shadow-sm transition active:scale-95">
                         <i data-lucide="log-out" class="h-5 w-5"></i>
                     </button>
                 </form>
@@ -68,7 +64,7 @@
         </div>
     </header>
 
-    <main class="flex-1 px-4 pb-28 pt-4">{{ $slot }}</main>
+    <main class="flex-1 px-5 pb-32 pt-5">{{ $slot }}</main>
 
     @php
         $navItems = [
@@ -83,13 +79,13 @@
     @endphp
 
     <nav class="fixed inset-x-0 bottom-0 z-30 pb-safe">
-        <div class="mx-auto max-w-md px-3 pb-3">
-            <div class="no-scrollbar flex gap-1 overflow-x-auto rounded-[20px] border border-[#E2E8F0] bg-white/90 px-1.5 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+        <div class="mx-auto max-w-md px-4 pb-4">
+            <div class="no-scrollbar flex gap-1 overflow-x-auto rounded-[24px] bg-white/95 px-2 py-1.5 shadow-[0_12px_40px_-8px_rgba(19,78,74,0.25)] backdrop-blur-xl">
                 @foreach ($navItems as [$route, $icon, $label, $pattern])
                     @php $active = request()->routeIs($pattern); @endphp
                     <a href="{{ route($route) }}"
-                        class="flex min-h-[64px] w-[62px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] tracking-wide {{ $active? 'font-semibold text-[#0F172A]' : 'font-medium text-[#64748B] hover:text-[#0F172A]' }}">
-                        <span class="flex h-8 w-10 items-center justify-center rounded-lg transition {{ $active? 'bg-[#0F172A] text-white shadow-sm' : '' }}">
+                        class="flex min-h-[62px] w-[64px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl text-[10px] tracking-wide transition {{ $active ? 'bg-teal-50 font-semibold text-teal-700' : 'font-medium text-[#94A3B8] hover:text-teal-700' }}">
+                        <span class="flex h-8 w-10 items-center justify-center rounded-xl transition {{ $active ? 'bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-md shadow-teal-600/30' : '' }}">
                             <i data-lucide="{{ $icon }}" class="h-[20px] w-[20px]"></i>
                         </span>
                         {{ $label }}
@@ -101,11 +97,10 @@
 </div>
 
 @livewireScripts
-<script src="https://unpkg.com/lucide@latest"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+    document.addEventListener('DOMContentLoaded', () => lucide.createIcons({ attrs: { 'stroke-width': 1.75 } }));
     // buat livewire navigate
-    document.addEventListener('livewire:navigated', () => lucide.createIcons());
+    document.addEventListener('livewire:navigated', () => lucide.createIcons({ attrs: { 'stroke-width': 1.75 } }));
 </script>
 </body>
 </html>

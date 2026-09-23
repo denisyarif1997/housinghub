@@ -18,9 +18,10 @@ class WaterBillingService
      *
      * @param  array<int, int|string|null>  $readings  [house_id => angka meter akhir]
      * @param  array<int, string>  $photos  [house_id => path foto di disk public]
+     * @param  array<int, float>  $startOverrides  [house_id => meter awal manual (opsional)]
      * @return array{saved: int, skipped: int, no_rate: int, invalid: int, attached: int, photo_dropped: int}
      */
-    public function saveReadings(int $year, int $month, ?int $estateId, ?int $userId, ?int $rateId, array $readings, array $photos = []): array
+    public function saveReadings(int $year, int $month, ?int $estateId, ?int $userId, ?int $rateId, array $readings, array $photos = [], array $startOverrides = []): array
     {
         $periodStart = Carbon::create($year, $month, 1)->startOfMonth();
         $out = ['saved' => 0, 'skipped' => 0, 'no_rate' => 0, 'invalid' => 0, 'attached' => 0, 'photo_dropped' => 0];
@@ -31,7 +32,7 @@ class WaterBillingService
             ->whereIn('id', $ids)
             ->get();
 
-        DB::transaction(function () use ($houses, $readings, $photos, $year, $month, $periodStart, $userId, $forced, &$out) {
+        DB::transaction(function () use ($houses, $readings, $photos, $startOverrides, $year, $month, $periodStart, $userId, $forced, &$out) {
             foreach ($houses as $house) {
                 $rate = $forced;
                 if ($rate && $rate->housing_estate_id && (int) $rate->housing_estate_id !== (int) $house->housing_estate_id) {
@@ -49,7 +50,9 @@ class WaterBillingService
                     continue;
                 }
                 $end = (float) $raw;
-                $start = (float) ($this->lastEnd($house->id, $year, $month) ?? 0);
+                $start = isset($startOverrides[$house->id])
+                    ? (float) $startOverrides[$house->id]
+                    : (float) ($this->lastEnd($house->id, $year, $month) ?? 0);
                 if ($end < $start) {
                     $out['invalid']++;
                     continue;

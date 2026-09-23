@@ -7,7 +7,7 @@
     @endif
 
     {{-- Header + statistik ringkas --}}
-    <div class="rounded-2xl bg-[#0F172A] p-4 text-white">
+    <div class="rounded-2xl bg-teal-700 p-4 text-white">
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
                 <h1 class="text-[20px] font-bold leading-tight">Forum Warga</h1>
@@ -36,13 +36,13 @@
     {{-- Komposer cepat ala sosmed --}}
     <button type="button" wire:click="openForm"
         class="flex w-full items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-3 text-left active:bg-slate-50">
-        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-[14px] font-bold text-white">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-700 text-[14px] font-bold text-white">
             {{ strtoupper(substr(auth()->user()->name ?? 'W', 0, 1)) }}
         </span>
         <span class="min-w-0 flex-1 truncate rounded-full bg-slate-100 px-4 py-2.5 text-[14px] text-[#64748B]">
             Apa yang ingin dibagikan ke warga?
         </span>
-        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-white">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-700 text-white">
             <i data-lucide="plus" class="h-5 w-5"></i>
         </span>
     </button>
@@ -52,7 +52,7 @@
         <div class="relative min-w-0 flex-1">
             <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]"></i>
             <input wire:model.live.debounce.300ms="search" type="search" placeholder="Cari diskusi..."
-                class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] bg-white pl-10 pr-3 text-[15px] outline-none focus:border-[#0F172A]">
+                class="min-h-[48px] w-full rounded-2xl border border-[#E2E8F0] bg-white pl-10 pr-3 text-[15px] outline-none focus:border-teal-600">
         </div>
         <select wire:model.live="sortBy" aria-label="Urutkan"
             class="min-h-[48px] w-[128px] shrink-0 rounded-2xl border border-[#E2E8F0] bg-white px-2 text-[14px]">
@@ -64,12 +64,12 @@
     {{-- Chip kategori --}}
     <div class="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         <button type="button" wire:click="setCategory('')"
-            class="shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition {{ $categoryFilter === '' ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
+            class="shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition {{ $categoryFilter === '' ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
             Semua
         </button>
         @foreach ($categories as $value => $label)
             <button type="button" wire:click="setCategory('{{ $value }}')"
-                class="shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition {{ $categoryFilter === $value ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
+                class="shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition {{ $categoryFilter === $value ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
                 {{ $label }}
             </button>
         @endforeach
@@ -78,19 +78,19 @@
     {{-- Chip ruang lingkup + status filter --}}
     <div class="flex gap-2">
         <button type="button" wire:click="setScope('')"
-            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === '' ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
+            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === '' ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
             Semua
         </button>
         <button type="button" wire:click="setScope('mine')"
-            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === 'mine' ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
+            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === 'mine' ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
             Milik saya
         </button>
         <button type="button" wire:click="setScope('today')"
-            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === 'today' ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
+            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === 'today' ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
             Hari ini
         </button>
         <button type="button" wire:click="setScope('pinned')"
-            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === 'pinned' ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
+            class="flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition {{ $scopeFilter === 'pinned' ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
             Disematkan
         </button>
     </div>
@@ -103,7 +103,7 @@
     @endif
 
     <div wire:loading.flex wire:target="search,categoryFilter,scopeFilter,sortBy" class="items-center gap-2 text-[13px] text-[#64748B]">
-        <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-[#0F172A]"></span>
+        <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-teal-700"></span>
         Memuat diskusi...
     </div>
 
@@ -157,7 +157,7 @@
         @empty
             <x-ui.empty-state icon="messages-square" title="Belum ada diskusi" subtitle="Jadilah yang pertama membuka diskusi di forum warga.">
                 @if (! $isFiltering)
-                    <button wire:click="openForm" class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] px-6 font-semibold text-white">
+                    <button wire:click="openForm" class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-6 font-semibold text-white">
                         <i data-lucide="plus" class="h-4 w-4"></i> Buat Postingan Pertama
                     </button>
                 @else
@@ -177,7 +177,7 @@
             <div class="relative flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white sm:rounded-3xl">
                 <div class="flex shrink-0 items-center justify-between gap-3 p-5 pb-3">
                     <div class="flex min-w-0 items-center gap-2.5">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-[14px] font-bold text-white">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-700 text-[14px] font-bold text-white">
                             {{ strtoupper(substr(auth()->user()->name ?? 'W', 0, 1)) }}
                         </span>
                         <div class="min-w-0">
@@ -195,7 +195,7 @@
                         <div class="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
                             @foreach ($categories as $value => $label)
                                 <button type="button" wire:click="$set('category', '{{ $value }}')"
-                                    class="shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition {{ $category === $value ? 'bg-[#0F172A] text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
+                                    class="shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition {{ $category === $value ? 'bg-teal-700 text-white' : 'border border-[#E2E8F0] bg-white text-[#64748B]' }}">
                                     {{ $label }}
                                 </button>
                             @endforeach
@@ -204,13 +204,13 @@
                     </div>
                     <x-ui.field label="Judul" :error="$errors->first('title')">
                         <input wire:model="title" maxlength="150" placeholder="Contoh: Gotong royong akhir pekan"
-                            class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-[#0F172A]">
+                            class="min-h-[48px] w-full rounded-xl border border-[#E2E8F0] px-3 text-[15px] outline-none focus:border-teal-600">
                         <p class="mt-1 text-right text-[12px] text-[#64748B]">{{ mb_strlen($title) }}/150</p>
                     </x-ui.field>
 
                     <x-ui.field label="Isi Postingan" :error="$errors->first('body')">
                         <textarea wire:model.live.debounce.200ms="body" rows="6" maxlength="3000" placeholder="Ceritakan sesuatu yang ingin dibagikan ke warga..."
-                            class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-[#0F172A]"></textarea>
+                            class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-teal-600"></textarea>
                         <p class="mt-1 text-right text-[12px] text-[#64748B]">{{ mb_strlen($body) }}/3000</p>
                     </x-ui.field>
 
@@ -220,7 +220,7 @@
                             Batal
                         </button>
                         <button type="submit" wire:loading.attr="disabled"
-                            class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
+                            class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-teal-700 font-semibold text-white disabled:opacity-60">
                             <span wire:loading.remove wire:target="submit">Bagikan</span>
                             <span wire:loading wire:target="submit">Mengirim...</span>
                         </button>

@@ -53,7 +53,7 @@
                 <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex min-w-0 flex-1 items-center gap-2">
-                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-[12px] font-bold text-white">{{ strtoupper(substr($comment->authorName(), 0, 1)) }}</div>
+                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-[12px] font-bold text-white">{{ strtoupper(substr($comment->authorName(), 0, 1)) }}</div>
                             <div class="min-w-0">
                                 <p class="truncate text-[14px] font-bold">{{ $comment->authorName() }}</p>
                                 <p class="text-[12px] text-[#64748B]">{{ $comment->created_at->diffForHumans() }}</p>
@@ -76,19 +76,19 @@
 
         <form wire:submit="addComment" class="mt-4">
             <div class="flex items-end gap-2">
-                <span class="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-[13px] font-bold text-white">
+                <span class="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-700 text-[13px] font-bold text-white">
                     {{ strtoupper(substr(auth()->user()->name ?? 'W', 0, 1)) }}
                 </span>
                 <div class="min-w-0 flex-1">
                     <x-ui.field label="Tulis Komentar" :error="$errors->first('body')">
                         <textarea wire:model.live.debounce.200ms="body" rows="2" maxlength="1000" placeholder="Tulis komentar yang sopan..."
-                            class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-[#0F172A]"></textarea>
+                            class="w-full rounded-xl border border-[#E2E8F0] px-3 py-2.5 text-[15px] outline-none focus:border-teal-600"></textarea>
                         <p class="mt-1 text-right text-[12px] text-[#64748B]">{{ mb_strlen($body) }}/1000</p>
                     </x-ui.field>
                 </div>
             </div>
             <button type="submit" wire:loading.attr="disabled"
-                class="mt-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] font-semibold text-white disabled:opacity-60">
+                class="mt-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-teal-700 font-semibold text-white disabled:opacity-60">
                 <i data-lucide="send" class="h-4 w-4"></i>
                 <span wire:loading.remove wire:target="addComment">Kirim</span>
                 <span wire:loading wire:target="addComment">Mengirim...</span>

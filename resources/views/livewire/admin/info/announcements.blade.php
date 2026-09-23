@@ -97,7 +97,7 @@
 
             <div class="flex justify-end pt-2">
                 <button type="submit" wire:loading.attr="disabled"
-                    class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0F172A] px-5 font-semibold text-white disabled:opacity-60">
+                    class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 shadow-lg shadow-teal-700/30 px-5 font-semibold text-white disabled:opacity-60">
                     <i data-lucide="save" class="h-5 w-5"></i>
                     <span wire:loading.remove wire:target="save">{{ $editingId ? 'Simpan Perubahan' : 'Simpan' }}</span>
                     <span wire:loading wire:target="save">Menyimpan...</span>
