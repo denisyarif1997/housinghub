@@ -9,7 +9,9 @@
 
     $flipped = $myColor === 'b';
     
-    // Sesuaikan urutan rank & file berdasarkan orientasi papan
+    // Sesuaikan koordinat berdasarkan orientasi papan:
+    // Papan biasa (Putih di bawah): Baris dari atas ke bawah = 8 -> 1, Kolom dari kiri ke kanan = a -> h
+    // Papan dibalik (Hitam di bawah): Baris dari atas ke bawah = 1 -> 8, Kolom dari kiri ke kanan = h -> a
     $ranks = $flipped ? ['1', '2', '3', '4', '5', '6', '7', '8'] : ['8', '7', '6', '5', '4', '3', '2', '1'];
     $files = $flipped ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -83,7 +85,7 @@
     @endif
 
     {{-- Container Papan Catur Utama --}}
-    <div class="mx-auto w-full max-w-md overflow-hidden rounded-2xl border-4 border-[#0F172A] bg-[#0F172A] p-1.5 select-none">
+    <div class="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-[#E2E8F0] bg-slate-900 dark:bg-slate-900 p-2 select-none shadow-sm">
         
         {{-- Label Huruf Atas (A-H) --}}
         <div class="mb-1 grid grid-cols-8 px-5 text-center text-[11px] font-bold text-slate-300">
@@ -93,7 +95,7 @@
         </div>
 
         <div class="flex items-center">
-            {{-- Label Angka Kiri (1-8) --}}
+            {{-- Label Angka Kiri (8-1 / 1-8) --}}
             <div class="flex w-5 flex-col justify-around self-stretch text-center text-[11px] font-bold text-slate-300">
                 @foreach ($ranks as $r)
                     <div class="flex-1 flex items-center justify-center">{{ $r }}</div>
@@ -134,7 +136,7 @@
                 @endforeach
             </div>
 
-            {{-- Label Angka Kanan (1-8) --}}
+            {{-- Label Angka Kanan (8-1 / 1-8) --}}
             <div class="flex w-5 flex-col justify-around self-stretch text-center text-[11px] font-bold text-slate-300">
                 @foreach ($ranks as $r)
                     <div class="flex-1 flex items-center justify-center">{{ $r }}</div>
