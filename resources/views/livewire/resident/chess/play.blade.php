@@ -7,8 +7,18 @@
     $whiteName = $game->whitePlayer?->name ?? 'Putih';
     $blackName = $game->blackPlayer?->name ?? 'Hitam';
 
-    $filesList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    $ranksList = ['8', '7', '6', '5', '4', '3', '2', '1'];
+    $flipped = $myColor === 'b';
+    
+    // Sesuaikan urutan rank & file berdasarkan orientasi papan
+    $ranks = $flipped ? ['1', '2', '3', '4', '5', '6', '7', '8'] : ['8', '7', '6', '5', '4', '3', '2', '1'];
+    $files = $flipped ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    $lastMove = end($moves) ?: null;
+    if ($replayAt !== null && isset($moves[$replayAt - 1])) {
+        $lastMove = $moves[$replayAt - 1];
+    }
+    $fromSq = $lastMove ? \App\Support\ChessEngine::squareIndex($lastMove['from']) : null;
+    $toSq = $lastMove ? \App\Support\ChessEngine::squareIndex($lastMove['to']) : null;
 @endphp
 
 <div x-data="{ showHistory: @js($showHistory) }" class="space-y-3" wire:poll.1.5s>
@@ -72,66 +82,73 @@
         </div>
     @endif
 
-    {{-- Papan Catur Dengan Koordinat A-H dan 1-8 --}}
-    @php
-        $flipped = $myColor === 'b';
-        $order = $flipped ? range(63, 0, -1) : range(0, 63);
-
-        $lastMove = end($moves) ?: null;
-        if ($replayAt !== null && isset($moves[$replayAt - 1])) {
-            $lastMove = $moves[$replayAt - 1];
-        }
-        $fromSq = $lastMove ? \App\Support\ChessEngine::squareIndex($lastMove['from']) : null;
-        $toSq = $lastMove ? \App\Support\ChessEngine::squareIndex($lastMove['to']) : null;
-    @endphp
-
-    <div class="mx-auto w-full max-w-md overflow-hidden rounded-2xl border-4 border-[#0F172A] bg-white select-none">
-        <div class="grid grid-cols-8">
-            @foreach ($order as $index)
-                @php
-                    $piece = $board[$index] ?? null;
-                    $rank = intdiv($index, 8);
-                    $file = $index % 8;
-                    $light = ($rank + $file) % 2 === 0;
-                    $isTarget = in_array($index, $targets);
-                    $isSelected = $selected === $index;
-                    $isLastMove = $lastMove && ($index === $fromSq || $index === $toSq);
-
-                    $showRank = $flipped ? ($file === 7) : ($file === 0);
-                    $showFile = $flipped ? ($rank === 0) : ($rank === 7);
-                @endphp
-                <button type="button" wire:click="tapSquare({{ $index }})" style="font-size:32px;line-height:0.85"
-                    class="relative flex aspect-square items-center justify-center overflow-hidden
-                        {{ $light ? 'bg-[#F0D9B5]' : 'bg-[#B58863]' }}
-                        {{ $isLastMove ? 'ring-4 ring-inset ring-amber-400' : '' }}
-                        {{ $isSelected ? 'ring-4 ring-inset ring-sky-500' : '' }}
-                        {{ $isTarget && $piece ? 'ring-4 ring-inset ring-red-500/70' : '' }}">
-                    
-                    {{-- Angka (Baris) di pojok kiri atas --}}
-                    @if ($showRank)
-                        <span class="absolute left-0.5 top-0.5 text-[9px] font-bold opacity-70 pointer-events-none {{ $light ? 'text-[#B58863]' : 'text-[#F0D9B5]' }}">
-                            {{ $ranksList[$rank] ?? '' }}
-                        </span>
-                    @endif
-
-                    {{-- Huruf (Kolom) di pojok kanan bawah --}}
-                    @if ($showFile)
-                        <span class="absolute right-0.5 bottom-0.5 text-[9px] font-bold opacity-70 pointer-events-none {{ $light ? 'text-[#B58863]' : 'text-[#F0D9B5]' }}">
-                            {{ $filesList[$file] ?? '' }}
-                        </span>
-                    @endif
-
-                    @if ($piece)
-                        <span style="font-weight:900;-webkit-text-stroke:1.5px currentColor;paint-order:stroke;{{ str_starts_with((string) $piece, 'w') ? 'color:#fff;text-shadow:0 0 2px #1e293b,0 1px 2px rgba(30,41,59,.8);' : 'color:#1e293b;text-shadow:0 1px 1px rgba(255,255,255,.4);' }}">
-                            {{ $pieces[$piece] }}
-                        </span>
-                    @endif
-                    @if ($isTarget && ! $piece)
-                        <span class="absolute h-4 w-4 rounded-full bg-teal-700/30"></span>
-                    @endif
-                </button>
+    {{-- Container Papan Catur Utama --}}
+    <div class="mx-auto w-full max-w-md overflow-hidden rounded-2xl border-4 border-[#0F172A] bg-[#0F172A] p-1.5 select-none">
+        
+        {{-- Label Huruf Atas (A-H) --}}
+        <div class="mb-1 grid grid-cols-8 px-5 text-center text-[11px] font-bold text-slate-300">
+            @foreach ($files as $f)
+                <div>{{ $f }}</div>
             @endforeach
         </div>
+
+        <div class="flex items-center">
+            {{-- Label Angka Kiri (1-8) --}}
+            <div class="flex w-5 flex-col justify-around self-stretch text-center text-[11px] font-bold text-slate-300">
+                @foreach ($ranks as $r)
+                    <div class="flex-1 flex items-center justify-center">{{ $r }}</div>
+                @endforeach
+            </div>
+
+            {{-- Grid Papan 8x8 --}}
+            <div class="grid flex-1 grid-cols-8 overflow-hidden rounded-lg">
+                @php
+                    $order = $flipped ? range(63, 0, -1) : range(0, 63);
+                @endphp
+                @foreach ($order as $index)
+                    @php
+                        $piece = $board[$index] ?? null;
+                        $rank = intdiv($index, 8);
+                        $file = $index % 8;
+                        $light = ($rank + $file) % 2 === 0;
+                        $isTarget = in_array($index, $targets);
+                        $isSelected = $selected === $index;
+                        $isLastMove = $lastMove && ($index === $fromSq || $index === $toSq);
+                    @endphp
+                    <button type="button" wire:click="tapSquare({{ $index }})" style="font-size:32px;line-height:0.85"
+                        class="relative flex aspect-square items-center justify-center overflow-hidden
+                            {{ $light ? 'bg-[#F0D9B5]' : 'bg-[#B58863]' }}
+                            {{ $isLastMove ? 'ring-4 ring-inset ring-amber-400' : '' }}
+                            {{ $isSelected ? 'ring-4 ring-inset ring-sky-500' : '' }}
+                            {{ $isTarget && $piece ? 'ring-4 ring-inset ring-red-500/70' : '' }}">
+
+                        @if ($piece)
+                            <span style="font-weight:900;-webkit-text-stroke:1.5px currentColor;paint-order:stroke;{{ str_starts_with((string) $piece, 'w') ? 'color:#fff;text-shadow:0 0 2px #1e293b,0 1px 2px rgba(30,41,59,.8);' : 'color:#1e293b;text-shadow:0 1px 1px rgba(255,255,255,.4);' }}">
+                                {{ $pieces[$piece] }}
+                            </span>
+                        @endif
+                        @if ($isTarget && ! $piece)
+                            <span class="absolute h-4 w-4 rounded-full bg-teal-700/30"></span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+
+            {{-- Label Angka Kanan (1-8) --}}
+            <div class="flex w-5 flex-col justify-around self-stretch text-center text-[11px] font-bold text-slate-300">
+                @foreach ($ranks as $r)
+                    <div class="flex-1 flex items-center justify-center">{{ $r }}</div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Label Huruf Bawah (A-H) --}}
+        <div class="mt-1 grid grid-cols-8 px-5 text-center text-[11px] font-bold text-slate-300">
+            @foreach ($files as $f)
+                <div>{{ $f }}</div>
+            @endforeach
+        </div>
+
     </div>
 
     {{-- Drawer Histori Langkah --}}
