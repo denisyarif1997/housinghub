@@ -25,6 +25,7 @@
         <x-ui.alert type="success" icon="check-circle-2">{{ session('success') }}</x-ui.alert>
     @endif
 
+
     {{-- Top Navigation & Header --}}
     <div class="flex items-center justify-between">
         <a href="{{ route('resident.chess.index') }}" wire:navigate
