@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Complaint;
 use App\Models\ComplaintResponse;
 use App\Models\User;
+use App\Notifications\ComplaintUpdated;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -66,6 +67,11 @@ class ComplaintDetail extends Component
             ]);
         });
 
+        // Tanggapan publik dikirim sebagai notifikasi ke warga pemilik pengaduan.
+        if (! $data['is_internal']) {
+            $this->notifyResident('reply', $data['response_message']);
+        }
+
         $this->reset('response_message', 'is_internal');
         $this->complaint->refresh();
         session()->flash('success', 'Tanggapan berhasil dikirim.');
@@ -109,7 +115,31 @@ class ComplaintDetail extends Component
         $this->complaint->refresh();
         $this->assigned_to = $this->complaint->assigned_to ? (string) $this->complaint->assigned_to : '';
 
+        // Beri tahu warga bila status pengaduannya berubah.
+        if (($old['status'] ?? null) !== $this->complaint->status) {
+            $this->notifyResident('status', (string) ($this->complaint->resolution_note ?? ''));
+        }
+
         session()->flash('success', 'Pengaduan berhasil diperbarui.');
+    }
+
+    /**
+     * Kirim notifikasi in-app ke seluruh akun warga pemilik pengaduan.
+     */
+    private function notifyResident(string $kind, string $message = ''): void
+    {
+        if (! $this->complaint->resident_id) {
+            return;
+        }
+
+        User::residentUsers((int) $this->complaint->resident_id)
+            ->get()
+            ->each(fn (User $residentUser) => $residentUser->notify(new ComplaintUpdated(
+                $this->complaint,
+                $kind,
+                $message,
+                auth()->user()?->name ?? 'Pengelola',
+            )));
     }
 
     #[Layout('layouts.admin', ['title' => 'Detail Pengaduan'])]

@@ -4,6 +4,8 @@ namespace App\Livewire\Resident\Forum;
 
 use App\Models\ActivityLog;
 use App\Models\Post;
+use App\Models\User;
+use App\Notifications\NewForumPost;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -137,6 +139,15 @@ class Index extends Component
 
             return $post;
         });
+
+        // Beri tahu staf pengelola forum + seluruh warga pada estate yang sama
+        // (duplikat antar peran dicegah unique('id'), penulis postingan dikecualikan).
+        User::staffWithPermission('manage-forum')
+            ->get()
+            ->concat(User::residentUsersOfEstate($estateId !== null ? (int) $estateId : null)->get())
+            ->unique('id')
+            ->where('id', '!=', $user->id)
+            ->each(fn (User $recipient) => $recipient->notify(new NewForumPost($post, $user->name)));
 
         $this->closeForm();
         session()->flash('success', 'Postingan berhasil dibagikan ke warga.');

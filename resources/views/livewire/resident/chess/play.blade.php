@@ -9,12 +9,6 @@
 
     $flipped = $myColor === 'b';
     
-    // Sesuaikan koordinat berdasarkan orientasi papan:
-    // Papan biasa (Putih di bawah): Baris dari atas ke bawah = 8 -> 1, Kolom dari kiri ke kanan = a -> h
-    // Papan dibalik (Hitam di bawah): Baris dari atas ke bawah = 1 -> 8, Kolom dari kiri ke kanan = h -> a
-    $ranks = $flipped ? ['1', '2', '3', '4', '5', '6', '7', '8'] : ['8', '7', '6', '5', '4', '3', '2', '1'];
-    $files = $flipped ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-
     $lastMove = end($moves) ?: null;
     if ($replayAt !== null && isset($moves[$replayAt - 1])) {
         $lastMove = $moves[$replayAt - 1];
@@ -86,24 +80,10 @@
 
     {{-- Container Papan Catur Utama --}}
     <div class="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-[#E2E8F0] bg-slate-900 dark:bg-slate-900 p-2 select-none shadow-sm">
-        
-        {{-- Label Huruf Atas (A-H) --}}
-        <div class="mb-1 grid grid-cols-8 px-5 text-center text-[11px] font-bold text-slate-300">
-            @foreach ($files as $f)
-                <div>{{ $f }}</div>
-            @endforeach
-        </div>
 
         <div class="flex items-center">
-            {{-- Label Angka Kiri (8-1 / 1-8) --}}
-            <div class="flex w-5 flex-col justify-around self-stretch text-center text-[11px] font-bold text-slate-300">
-                @foreach ($ranks as $r)
-                    <div class="flex-1 flex items-center justify-center">{{ $r }}</div>
-                @endforeach
-            </div>
-
             {{-- Grid Papan 8x8 --}}
-            <div class="grid flex-1 grid-cols-8 overflow-hidden rounded-lg">
+            <div class="grid aspect-square min-w-0 flex-1 grid-cols-8 grid-rows-8 overflow-hidden rounded-lg">
                 @php
                     $order = $flipped ? range(63, 0, -1) : range(0, 63);
                 @endphp
@@ -118,7 +98,7 @@
                         $isLastMove = $lastMove && ($index === $fromSq || $index === $toSq);
                     @endphp
                     <button type="button" wire:click="tapSquare({{ $index }})" style="font-size:32px;line-height:0.85"
-                        class="relative flex aspect-square items-center justify-center overflow-hidden
+                        class="relative flex h-full w-full min-h-0 min-w-0 items-center justify-center overflow-hidden
                             {{ $light ? 'bg-[#F0D9B5]' : 'bg-[#B58863]' }}
                             {{ $isLastMove ? 'ring-4 ring-inset ring-amber-400' : '' }}
                             {{ $isSelected ? 'ring-4 ring-inset ring-sky-500' : '' }}
@@ -135,20 +115,6 @@
                     </button>
                 @endforeach
             </div>
-
-            {{-- Label Angka Kanan (8-1 / 1-8) --}}
-            <div class="flex w-5 flex-col justify-around self-stretch text-center text-[11px] font-bold text-slate-300">
-                @foreach ($ranks as $r)
-                    <div class="flex-1 flex items-center justify-center">{{ $r }}</div>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- Label Huruf Bawah (A-H) --}}
-        <div class="mt-1 grid grid-cols-8 px-5 text-center text-[11px] font-bold text-slate-300">
-            @foreach ($files as $f)
-                <div>{{ $f }}</div>
-            @endforeach
         </div>
 
     </div>

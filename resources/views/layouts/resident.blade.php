@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ $title }}</title>
     <meta name="color-scheme" content="light dark">
+    
 
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
@@ -20,14 +21,18 @@
     @livewireStyles
 
     <script>
-        // Terapkan tema sebelum render untuk mencegah flash (FOUC).
-        (function () {
-            var t = localStorage.getItem('theme');
-            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
-        })();
-    </script>
+    // Default awal selalu mode terang.
+    // Dark hanya digunakan jika user sebelumnya memilihnya.
+    (function () {
+        var t = localStorage.getItem('theme');
+
+        if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    })();
+</script>
 
     <style>
         /* fix untuk notch iphone */
@@ -47,6 +52,7 @@
                 <p class="font-bold tracking-tight text-[#134E4A]">{{ config('app.name', 'HousingHub') }}</p>
             </a>
             <div class="flex items-center gap-2">
+                <livewire:notifications />
                 <button type="button" data-theme-toggle
                     class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#134E4A] shadow-sm transition active:scale-95"
                     aria-label="Ganti tema">

@@ -5,6 +5,8 @@ namespace App\Livewire\Resident\Forum;
 use App\Models\ActivityLog;
 use App\Models\Post;
 use App\Models\PostComment;
+use App\Models\User;
+use App\Notifications\NewCommentOnPost;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -37,7 +39,7 @@ class Show extends Component
             'body.required' => 'Komentar tidak boleh kosong.',
         ]);
 
-        DB::transaction(function () use ($data, $user) {
+        $comment = DB::transaction(function () use ($data, $user) {
             $comment = PostComment::create([
                 'post_id' => $this->post->id,
                 'resident_id' => $user->resident_id,
@@ -54,7 +56,18 @@ class Show extends Component
                 'description' => 'Komentar baru pada postingan: '.$this->post->title,
                 'new_values' => $comment->toArray(),
             ]);
+
+            return $comment;
         });
+
+        // Beri tahu penulis postingan bahwa ada komentar baru.
+        if ($this->post->user_id && (int) $this->post->user_id !== (int) $user->id) {
+            User::query()
+                ->where('id', $this->post->user_id)
+                ->where('status', 'active')
+                ->first()
+                ?->notify(new NewCommentOnPost($this->post, $comment->body, $user->name));
+        }
 
         $this->reset('body');
         $this->post->refresh();

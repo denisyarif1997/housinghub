@@ -91,6 +91,7 @@
                 <button @click="sidebar=true" class="flex h-11 w-11 items-center justify-center rounded-xl border lg:hidden"><i data-lucide="menu" class="h-5 w-5"></i></button>
                 <h1 class="flex-1 truncate text-lg font-bold">{{ $title }}</h1>
                 <div class="flex items-center gap-2">
+                    <livewire:notifications variant="admin" />
                     <button type="button" data-theme-toggle
                         class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] transition hover:bg-slate-100"
                         aria-label="Ganti tema">

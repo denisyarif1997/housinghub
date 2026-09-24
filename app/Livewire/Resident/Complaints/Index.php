@@ -4,6 +4,8 @@ namespace App\Livewire\Resident\Complaints;
 
 use App\Models\ActivityLog;
 use App\Models\Complaint;
+use App\Models\User;
+use App\Notifications\NewComplaint;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -93,6 +95,12 @@ class Index extends Component
 
             return $complaint;
         });
+
+        // Beri tahu staf penanggung jawab laporan bahwa ada pengaduan baru.
+        User::staffWithPermission('manage-complaint')
+            ->where('id', '!=', $user->id)
+            ->get()
+            ->each(fn (User $staff) => $staff->notify(new NewComplaint($complaint, $user->name)));
 
         $this->closeForm();
         session()->flash('success', 'Pengaduan berhasil dikirim dengan nomor tiket '.$complaint->ticket_number.'.');

@@ -4,6 +4,8 @@ namespace App\Livewire\Admin\Info;
 
 use App\Models\ActivityLog;
 use App\Models\Announcement;
+use App\Models\User;
+use App\Notifications\NewAnnouncement;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -111,6 +113,11 @@ class Announcements extends Component
                 'old_values' => $old, 'new_values' => $item->fresh()->toArray(),
             ]);
 
+            // Pengumuman yang baru berstatus terbit → notifikasi ke warga.
+            if (($old['status'] ?? null) !== 'published') {
+                $this->notifyResidents($item);
+            }
+
             session()->flash('success', 'Pengumuman berhasil diubah.');
         } else {
             $item = Announcement::create($payload + ['user_id' => auth()->id()]);
@@ -121,6 +128,10 @@ class Announcements extends Component
                 'description' => 'Menambah pengumuman: '.$item->title,
                 'new_values' => $item->toArray(),
             ]);
+
+            if ($item->status === 'published') {
+                $this->notifyResidents($item);
+            }
 
             session()->flash('success', 'Pengumuman berhasil ditambah.');
         }
@@ -133,6 +144,7 @@ class Announcements extends Component
         abort_unless(auth()->user()->hasPermission('manage-announcement'), 403);
 
         $item = Announcement::findOrFail($id);
+        $wasPublished = $item->status === 'published';
         $item->update(['status' => 'published', 'published_at' => $item->published_at ?? now()]);
 
         ActivityLog::record([
@@ -141,6 +153,10 @@ class Announcements extends Component
             'description' => 'Menerbitkan pengumuman: '.$item->title,
             'new_values' => $item->fresh()->toArray(),
         ]);
+
+        if (! $wasPublished) {
+            $this->notifyResidents($item);
+        }
 
         session()->flash('success', 'Pengumuman diterbitkan.');
     }
@@ -181,6 +197,27 @@ class Announcements extends Component
         }
 
         session()->flash('success', 'Pengumuman dihapus.');
+    }
+
+    /**
+     * Kirim notifikasi in-app ke warga estate terkait (null = semua warga)
+     * ketika pengumuman berstatus terbit dan waktu terbitnya sudah tiba.
+     */
+    private function notifyResidents(Announcement $item): void
+    {
+        if ($item->status !== 'published') {
+            return;
+        }
+
+        if ($item->published_at && $item->published_at->isFuture()) {
+            return;
+        }
+
+        User::residentUsersOfEstate($item->housing_estate_id)
+            ->get()
+            ->each(fn (User $residentUser) => $residentUser->notify(
+                new NewAnnouncement($item, auth()->user()?->name ?? 'Pengelola'),
+            ));
     }
 
     #[Layout('layouts.admin', ['title' => 'Pengumuman'])]
