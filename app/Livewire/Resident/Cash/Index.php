@@ -23,6 +23,7 @@ class Index extends Component
     {
         return view('livewire.resident.cash.index', [
             'transactions' => CashTransaction::with(['account'])
+                ->whereNull('payment_id') // Sembunyikan transaksi dari pembayaran tagihan IPL/Air
                 ->when($this->search, fn ($q) => $q->where(fn ($w) => $w
                     ->where('description', 'like', "%{$this->search}%")
                     ->orWhere('reference', 'like', "%{$this->search}%")
