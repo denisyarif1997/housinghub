@@ -9,7 +9,8 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
-    #[Layout('layouts.resident', ['title' => 'Halo'])]
+    
+    #[Layout('layouts.resident', ['title' => config('app.name')])]
     public function render()
     {
         $user = Auth::user()->loadMissing(['resident.houseResidents.house.block', 'role']);
