@@ -26,6 +26,7 @@ use App\Livewire\Admin\Users\Index as UserIndex;
 use App\Livewire\Admin\Water\Rates\Index as WaterRateIndex;
 use App\Livewire\Admin\Water\Readings as WaterReadings;
 use App\Livewire\Auth\Login;
+use App\Livewire\Resident\Cash\Index as ResidentCashIndex;
 use App\Livewire\Resident\Chess\Index as ResidentChessIndex;
 use App\Livewire\Resident\Chess\Play as ResidentChessPlay;
 use App\Livewire\Resident\Complaints\Index as ResidentComplaintIndex;
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/forum/{post}', ResidentForumShow::class)->name('forum.show');
         Route::get('/chess', ResidentChessIndex::class)->name('chess.index');
         Route::get('/chess/{game}', ResidentChessPlay::class)->name('chess.play');
+        Route::get('/cash', ResidentCashIndex::class)->name('cash.index');
         Route::get('/profile', ResidentProfile::class)->name('profile');
     });
 

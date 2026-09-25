@@ -76,6 +76,7 @@
         $navItems = [
             ['resident.dashboard', 'home', 'Home', 'resident.dashboard'],
             ['resident.ipl.index', 'wallet', 'Iuran', 'resident.ipl.*'],
+            ['resident.cash.index', 'banknote', 'Kas', 'resident.cash.*'],
             ['resident.chess.index', 'crown', 'Catur', 'resident.chess.*'],
             ['resident.forum.index', 'messages-square', 'Forum', 'resident.forum.*'],
             ['resident.complaints.index', 'wrench', 'Aduan', 'resident.complaints.*'],
